@@ -46,6 +46,10 @@ void setup() {
 }
 
 void loop() {
+  // High refresh-rate update (~10 FPS) for smooth CarPlay-like movement
+  uint32_t now = millis();
+  NavigationDashboard_Tick(&navDashboard, now);
+
   // Clear the dashboard to black for CarPlay style
   Paint_Clear(BLACK);
 
@@ -56,5 +60,5 @@ void loop() {
   wavesahre_rgb_lcd_display(DashboardImage);
 
   Serial.println("DASHBOARD: navigation dashboard rendered and display updated");
-  delay(1000);
+  delay(100);
 }

@@ -1,10 +1,24 @@
 #include "navigation_dashboard.h"
 #include <string.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdio.h>
 
 // Helper macros for trigonometric calculations
 #define DEG_TO_RAD(deg) ((deg) * M_PI / 180.0)
 #define RAD_TO_DEG(rad) ((rad) * 180.0 / M_PI)
+
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+} MapPoint;
+
+static void NavigationDashboard_DrawPolyline(const MapPoint* points, size_t count, uint16_t color, DOT_PIXEL width) {
+    if (points == NULL || count < 2) return;
+    for (size_t i = 0; i < count - 1; ++i) {
+        Paint_DrawLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, color, width, LINE_STYLE_SOLID);
+    }
+}
 
 /**
  * @brief Initialize the navigation dashboard component
@@ -19,14 +33,22 @@ void NavigationDashboard_Init(NavigationDashboard* nav) {
     // Set default values
     strcpy(nav->state.distance, "4.2 mi");
     strcpy(nav->state.instruction, "Take a slight left turn for I-395 North");
+    strcpy(nav->state.nextStreet, "onto Massachusetts Ave");
+    strcpy(nav->state.currentStreet, "3rd St NW");
+    strcpy(nav->state.arrivalTime, "9:41");
+    strcpy(nav->state.eta, "12 min");
     nav->state.totalMileage = 14175;
     strcpy(nav->state.drivingMode, "ECO");
     nav->state.temperature = 161;
     nav->state.batteryLevel = 85;
     nav->state.compassHeading = 161;
+    nav->state.speedKph = 48.0f;
+    nav->state.remainingDistanceKm = 6.7f;
+    nav->state.mapProgress = 0.0f;
     nav->state.showNavigation = true;
     nav->state.isNavigating = true;
     nav->state.progressPercent = 65;
+    nav->state.lastArrivalBaseMin = 9 * 60 + 29; // 9:29 AM baseline
 
     nav->initialized = true;
 }
@@ -43,6 +65,54 @@ void NavigationDashboard_UpdateState(NavigationDashboard* nav, NavigationState* 
 }
 
 /**
+ * @brief Tick navigation simulation / smoothing for high refresh rates
+ * @param nav Pointer to navigation dashboard structure
+ * @param nowMs Current time in milliseconds
+ */
+void NavigationDashboard_Tick(NavigationDashboard* nav, uint32_t nowMs) {
+    if (nav == NULL || !nav->initialized) return;
+
+    if (nav->state.lastUpdateMs == 0) {
+        nav->state.lastUpdateMs = nowMs;
+        return;
+    }
+
+    uint32_t delta = nowMs - nav->state.lastUpdateMs;
+    nav->state.lastUpdateMs = nowMs;
+
+    // Smoothly animate speed and heading for a lively UI
+    float deltaSeconds = delta / 1000.0f;
+    nav->state.speedKph = 45.0f + 5.0f * sinf(nowMs / 1200.0f);
+    nav->state.compassHeading = 150 + (int16_t)(15.0f * sinf(nowMs / 1800.0f));
+
+    // Progress movement along the route
+    float progress = nav->state.progressPercent / 100.0f;
+    progress += deltaSeconds * 0.012f; // ~1.2% per second
+    if (progress > 1.0f) progress = 1.0f;
+    nav->state.progressPercent = (uint8_t)(progress * 100.0f);
+    nav->state.mapProgress = progress;
+
+    // Update remaining distance and ETA
+    float kmRemaining = nav->state.remainingDistanceKm - deltaSeconds * (nav->state.speedKph / 3.6f) * 0.6f;
+    if (kmRemaining < 0.1f) kmRemaining = 0.1f;
+    nav->state.remainingDistanceKm = kmRemaining;
+
+    // Distance string (miles)
+    float milesRemaining = kmRemaining * 0.621371f;
+    snprintf(nav->state.distance, sizeof(nav->state.distance), "%.1f mi", milesRemaining);
+
+    // ETA in minutes
+    uint16_t etaMinutes = (uint16_t)((kmRemaining / (nav->state.speedKph / 60.0f)) + 0.5f);
+    snprintf(nav->state.eta, sizeof(nav->state.eta), "%u min", etaMinutes);
+
+    // Arrival time from a fixed base clock to mimic CarPlay
+    uint32_t arrivalMinutes = nav->state.lastArrivalBaseMin + etaMinutes;
+    uint16_t arrivalHour = (arrivalMinutes / 60) % 24;
+    uint16_t arrivalMin = arrivalMinutes % 60;
+    snprintf(nav->state.arrivalTime, sizeof(nav->state.arrivalTime), "%02u:%02u", arrivalHour, arrivalMin);
+}
+
+/**
  * @brief Render the complete navigation dashboard
  * @param nav Pointer to navigation dashboard structure
  * @param x Top-left X coordinate for the component
@@ -54,13 +124,12 @@ void NavigationDashboard_Render(NavigationDashboard* nav, uint16_t x, uint16_t y
     // Draw background first
     NavigationDashboard_DrawBackground(x, y);
 
-    // Draw navigation elements
-    NavigationDashboard_DrawNavigationText(nav, x, y);
-    NavigationDashboard_DrawVehicleInfo(nav, x, y);
-    NavigationDashboard_DrawCompass(nav, x, y);
-    NavigationDashboard_DrawProgressBar(nav->state.progressPercent, x + NAV_PROGRESS_X, y + NAV_PROGRESS_Y);
-    NavigationDashboard_DrawTemperatureGauge(nav->state.temperature, x + NAV_COMPASS_CENTER_X, y + NAV_COMPASS_CENTER_Y, NAV_COMPASS_RADIUS);
-    NavigationDashboard_DrawBatteryIndicator(nav->state.batteryLevel, x + 50, y + 50); // Position to be adjusted
+    // Map canvas and overlays
+    NavigationDashboard_DrawMap(nav, x, y);
+    NavigationDashboard_DrawStatusBar(nav, x, y);
+
+    // Lower CarPlay-style card
+    NavigationDashboard_DrawNavigationCard(nav, x, y);
 }
 
 /**
@@ -69,11 +138,115 @@ void NavigationDashboard_Render(NavigationDashboard* nav, uint16_t x, uint16_t y
  * @param y Top-left Y coordinate
  */
 void NavigationDashboard_DrawBackground(uint16_t x, uint16_t y) {
-    // Draw main background rectangle
-    Paint_DrawRectangle(x + NAV_BACKGROUND_X, y + NAV_BACKGROUND_Y,
-                       x + NAV_BACKGROUND_X + NAV_BACKGROUND_WIDTH,
-                       y + NAV_BACKGROUND_Y + NAV_BACKGROUND_HEIGHT,
+    // Draw main background rectangle covering the full dashboard footprint
+    Paint_DrawRectangle(x, y,
+                       x + NAV_DASHBOARD_WIDTH,
+                       y + NAV_DASHBOARD_HEIGHT,
                        NAV_BACKGROUND_COLOR, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+}
+
+/**
+ * @brief Draw top status bar (time, connectivity)
+ */
+void NavigationDashboard_DrawStatusBar(NavigationDashboard* nav, uint16_t x, uint16_t y) {
+    // Header band for sky/glass effect
+    Paint_DrawRectangle(x, y, x + NAV_DASHBOARD_WIDTH, y + NAV_STATUS_HEIGHT,
+                        NAV_MAP_SKY, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+
+    char clockStr[8];
+    uint16_t baseHour = nav->state.lastArrivalBaseMin / 60;
+    uint16_t baseMin = nav->state.lastArrivalBaseMin % 60;
+    snprintf(clockStr, sizeof(clockStr), "%02u:%02u", baseHour, baseMin);
+
+    Paint_DrawString_EN(x + 20, y + 20, clockStr, &Font20, NAV_TEXT_WHITE, NAV_MAP_SKY);
+    Paint_DrawString_EN(x + 110, y + 22, "CarPlay Studio", &Font16, NAV_TEXT_GRAY, NAV_MAP_SKY);
+
+    // Network bars
+    uint16_t barX = x + NAV_DASHBOARD_WIDTH - 200;
+    for (int i = 0; i < 4; ++i) {
+        uint16_t height = 8 + i * 4;
+        Paint_DrawRectangle(barX + (i * 8), y + NAV_STATUS_HEIGHT - height - 10,
+                            barX + (i * 8) + 4, y + NAV_STATUS_HEIGHT - 10,
+                            NAV_TEXT_WHITE, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+    }
+    Paint_DrawString_EN(barX + 40, y + 20, "LTE", &Font12, NAV_TEXT_WHITE, NAV_MAP_SKY);
+
+    // Speed preview on the status bar
+    char speedStr[16];
+    snprintf(speedStr, sizeof(speedStr), "%2.0f km/h", nav->state.speedKph);
+    Paint_DrawString_EN(x + NAV_DASHBOARD_WIDTH / 2 - 30, y + 20, speedStr, &Font12, NAV_TEXT_WHITE, NAV_MAP_SKY);
+
+    // Battery indicator aligned to the right
+    NavigationDashboard_DrawBatteryIndicator(nav->state.batteryLevel, x + NAV_BATTERY_X, y + NAV_BATTERY_Y);
+}
+
+/**
+ * @brief Draw stylized map canvas and route
+ */
+void NavigationDashboard_DrawMap(NavigationDashboard* nav, uint16_t x, uint16_t y) {
+    // Map background
+    Paint_DrawRectangle(x + NAV_MAP_X, y + NAV_MAP_Y + NAV_STATUS_HEIGHT,
+                        x + NAV_MAP_WIDTH, y + NAV_MAP_HEIGHT,
+                        NAV_BACKGROUND_COLOR, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+
+    // Secondary road grid
+    MapPoint secondaryGrid[] = {
+        {60, 220}, {240, 180}, {420, 200}, {620, 180}, {840, 220}
+    };
+    NavigationDashboard_DrawPolyline(secondaryGrid, sizeof(secondaryGrid) / sizeof(MapPoint), NAV_MAP_ROAD_SECONDARY, DOT_PIXEL_1X1);
+
+    MapPoint verticalGrid[] = {
+        {200, 120}, {200, 420}, {320, 160}, {320, 420}
+    };
+    NavigationDashboard_DrawPolyline(verticalGrid, 2, NAV_MAP_ROAD_SECONDARY, DOT_PIXEL_1X1);
+    NavigationDashboard_DrawPolyline(&verticalGrid[2], 2, NAV_MAP_ROAD_SECONDARY, DOT_PIXEL_1X1);
+
+    // Main roads
+    MapPoint mainRoad[] = {
+        {80, 360}, {260, 320}, {420, 360}, {640, 340}, {900, 360}
+    };
+    NavigationDashboard_DrawPolyline(mainRoad, sizeof(mainRoad) / sizeof(MapPoint), NAV_MAP_ROAD_MAIN, DOT_PIXEL_2X2);
+
+    // Active route polyline
+    MapPoint route[] = {
+        {140, 400}, {280, 300}, {440, 260}, {620, 300}, {760, 240}, {920, 280}
+    };
+    NavigationDashboard_DrawPolyline(route, sizeof(route) / sizeof(MapPoint), NAV_MAP_ROUTE, DOT_PIXEL_2X2);
+
+    // Determine current position along route
+    float t = nav->state.mapProgress;
+    if (t > 0.98f) t = 0.98f;
+    size_t segmentCount = (sizeof(route) / sizeof(MapPoint)) - 1;
+    float scaled = t * segmentCount;
+    size_t segIndex = (size_t)scaled;
+    float localT = scaled - segIndex;
+    MapPoint start = route[segIndex];
+    MapPoint end = route[segIndex + 1];
+    uint16_t curX = (uint16_t)(start.x + (end.x - start.x) * localT);
+    uint16_t curY = (uint16_t)(start.y + (end.y - start.y) * localT);
+
+    // Draw vehicle locator
+    Paint_DrawCircle(curX, curY, 8, NAV_TEXT_WHITE, DOT_PIXEL_2X2, DRAW_FILL_FULL);
+    Paint_DrawCircle(curX, curY, 12, NAV_MAP_ROUTE, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+
+    // Heading triangle using angled lines
+    NavigationDashboard_DrawAngledLine(curX, curY, 20, nav->state.compassHeading - 90, NAV_TEXT_WHITE, 2);
+}
+
+/**
+ * @brief Draw the lower navigation card (instructions, ETA, etc.)
+ */
+void NavigationDashboard_DrawNavigationCard(NavigationDashboard* nav, uint16_t x, uint16_t y) {
+    uint16_t cardTop = y + NAV_MAP_HEIGHT;
+    NavigationDashboard_DrawRoundedRect(x + NAV_CARD_PADDING / 2, cardTop + 4,
+                                        NAV_DASHBOARD_WIDTH - NAV_CARD_PADDING, NAV_CARD_HEIGHT - 8,
+                                        12, NAV_ACCENT_COLOR, NAV_ACCENT_COLOR);
+
+    NavigationDashboard_DrawNavigationText(nav, x, y);
+    NavigationDashboard_DrawVehicleInfo(nav, x, y);
+    NavigationDashboard_DrawCompass(nav, x, y);
+    NavigationDashboard_DrawTemperatureGauge(nav->state.temperature, x + NAV_TEMPERATURE_X, y + NAV_TEMPERATURE_Y, NAV_COMPASS_RADIUS);
+    NavigationDashboard_DrawProgressBar(nav->state.progressPercent, x + NAV_PROGRESS_X, y + NAV_PROGRESS_Y);
 }
 
 /**
@@ -85,13 +258,17 @@ void NavigationDashboard_DrawBackground(uint16_t x, uint16_t y) {
 void NavigationDashboard_DrawNavigationText(NavigationDashboard* nav, uint16_t x, uint16_t y) {
     if (!nav->state.showNavigation) return;
 
-    // Draw distance
+    // Draw distance with large, legible font
     Paint_DrawString_EN(x + NAV_DISTANCE_X, y + NAV_DISTANCE_Y,
-                       nav->state.distance, &Font24, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
+                       nav->state.distance, &Font48, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
 
-    // Draw instruction
+    // Draw primary instruction
     Paint_DrawString_EN(x + NAV_INSTRUCTION_X, y + NAV_INSTRUCTION_Y,
-                       nav->state.instruction, &Font16, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
+                       nav->state.instruction, &Font20, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
+
+    // Draw next street hint
+    Paint_DrawString_EN(x + NAV_NEXT_STREET_X, y + NAV_NEXT_STREET_Y,
+                       nav->state.nextStreet, &Font16, NAV_TEXT_GRAY, NAV_ACCENT_COLOR);
 }
 
 /**
@@ -104,13 +281,18 @@ void NavigationDashboard_DrawVehicleInfo(NavigationDashboard* nav, uint16_t x, u
     char mileageStr[16];
     NavigationDashboard_FormatMileage(nav->state.totalMileage, mileageStr);
 
-    // Draw total mileage
-    Paint_DrawString_EN(x + NAV_TOTAL_MILEAGE_X, y + NAV_TOTAL_MILEAGE_Y,
-                       mileageStr, &Font12, NAV_TEXT_GRAY, NAV_BACKGROUND_COLOR);
+    // ETA and arrival time block
+    Paint_DrawString_EN(x + NAV_ETA_X, y + NAV_ETA_Y,
+                       nav->state.eta, &Font24, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
+    Paint_DrawString_EN(x + NAV_ETA_X, y + NAV_ETA_Y + 30,
+                       nav->state.arrivalTime, &Font16, NAV_TEXT_GRAY, NAV_ACCENT_COLOR);
 
-    // Draw driving mode
+    // Draw total mileage and mode stacked for a compact card layout
+    Paint_DrawString_EN(x + NAV_TOTAL_MILEAGE_X, y + NAV_TOTAL_MILEAGE_Y,
+                       mileageStr, &Font12, NAV_TEXT_GRAY, NAV_ACCENT_COLOR);
+
     Paint_DrawString_EN(x + NAV_MODE_X, y + NAV_MODE_Y,
-                       nav->state.drivingMode, &Font16, NAV_TEXT_GREEN, NAV_BACKGROUND_COLOR);
+                       nav->state.drivingMode, &Font16, NAV_TEXT_GREEN, NAV_ACCENT_COLOR);
 }
 
 /**
@@ -128,10 +310,10 @@ void NavigationDashboard_DrawCompass(NavigationDashboard* nav, uint16_t x, uint1
     Paint_DrawCircle(centerX, centerY, radius, NAV_ACCENT_COLOR, DOT_PIXEL_2X2, DRAW_FILL_EMPTY);
 
     // Draw cardinal directions (N, E, S, W)
-    Paint_DrawString_EN(centerX - 4, centerY - radius - 15, "N", &Font8, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
-    Paint_DrawString_EN(centerX + radius + 2, centerY - 4, "E", &Font8, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
-    Paint_DrawString_EN(centerX - 4, centerY + radius + 2, "S", &Font8, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
-    Paint_DrawString_EN(centerX - radius - 10, centerY - 4, "W", &Font8, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
+    Paint_DrawString_EN(centerX - 4, centerY - radius - 15, "N", &Font8, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
+    Paint_DrawString_EN(centerX + radius + 2, centerY - 4, "E", &Font8, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
+    Paint_DrawString_EN(centerX - 4, centerY + radius + 2, "S", &Font8, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
+    Paint_DrawString_EN(centerX - radius - 10, centerY - 4, "W", &Font8, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
 
     // Draw heading indicator
     int16_t heading = nav->state.compassHeading;
@@ -202,8 +384,8 @@ void NavigationDashboard_DrawTemperatureGauge(uint16_t value, uint16_t x, uint16
     // Draw temperature value in center
     char tempStr[8];
     sprintf(tempStr, "%d", value);
-    Paint_DrawString_EN(x - 15, y - 8, tempStr, &Font12, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
-    Paint_DrawString_EN(x + 5, y - 8, "°", &Font8, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
+    Paint_DrawString_EN(x - 15, y - 8, tempStr, &Font12, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
+    Paint_DrawString_EN(x + 5, y - 8, "°", &Font8, NAV_TEXT_WHITE, NAV_ACCENT_COLOR);
 }
 
 /**
@@ -232,7 +414,7 @@ void NavigationDashboard_DrawBatteryIndicator(uint8_t level, uint16_t x, uint16_
     // Draw percentage text
     char levelStr[8];
     sprintf(levelStr, "%d%%", level);
-    Paint_DrawString_EN(x + width + 5, y, levelStr, &Font8, NAV_TEXT_WHITE, NAV_BACKGROUND_COLOR);
+    Paint_DrawString_EN(x + width + 5, y, levelStr, &Font8, NAV_TEXT_WHITE, NAV_MAP_SKY);
 }
 
 /**
