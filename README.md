@@ -10,6 +10,7 @@ A complete automotive-grade instrument cluster dashboard with Apple CarPlay-insp
 - **Fuel Gauge**: Digital fuel level indicator with percentage display
 - **Temperature Gauge**: Engine temperature monitoring (70-110°C)
 - **Navigation Display**: Turn-by-turn navigation with distance indicators
+- **Live Map Simulation**: CarPlay-style map canvas with animated route progress
 - **Media Controls**: Music player interface with play/pause controls
 - **Climate Control**: Temperature and HVAC status display
 - **Status Indicators**: Signal lights, warnings, and system status
@@ -18,6 +19,7 @@ A complete automotive-grade instrument cluster dashboard with Apple CarPlay-insp
 - **Dark Mode Interface**: Optimized for nighttime driving
 - **Large, Readable Fonts**: Safety-focused typography
 - **Smooth Animations**: Gauge needle animations and transitions
+- **Fast Refresh Navigation Loop**: 100ms UI updates to keep map and telemetry responsive
 - **Modern UI Elements**: Rounded corners, proper spacing
 - **High Contrast**: Excellent visibility in various lighting conditions
 
