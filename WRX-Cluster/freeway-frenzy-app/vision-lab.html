@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetroVision Lab</title>
+<meta name="description" content="Browser lab for the RetroVision ESP32-C3 sensor fusion stack, TFmini-S LiDAR range data, camera detections, and ESP32-S3 perception HUD.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script>
+  // Apply chromeless class as early as possible so layout is correct on first paint.
+  (function() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('chromeless') === '1') {
+        document.body.classList.add('chromeless');
+      }
+    } catch (e) { /* noop */ }
+  })();
+</script>
+<div class="lab">
+
+  <!-- Day/Night toggle -->
+  <button id="themeToggle">☀ Day</button>
+
+  <!-- LEFT: ESP32-S3 HUD (Tesla-vision style) -->
+  <section class="panel" id="hudPanel">
+    <div class="panel-head">
+      <span>Perception HUD</span>
+      <span class="pill" id="hudFps">— fps</span>
+    </div>
+    <canvas id="hud"></canvas>
+    <div class="legend-key">
+      <span class="lk-item"><span class="lk-dot" style="background:var(--neon-c);"></span>Detection</span>
+      <span class="lk-item"><span class="lk-dot" style="background:var(--neon-rd);"></span>LiDAR ray</span>
+      <span class="lk-item"><span class="lk-dot" style="background:var(--neon-y);"></span>Caution zone</span>
+    </div>
+    <div class="drive-pad" aria-label="Drive controls">
+      <button class="drive-btn" data-drive="up" aria-label="Accelerate">↑</button>
+      <button class="drive-btn" data-drive="left" aria-label="Steer left">←</button>
+      <button class="drive-btn" data-drive="down" aria-label="Brake">↓</button>
+      <button class="drive-btn" data-drive="right" aria-label="Steer right">→</button>
+    </div>
+  </section>
+
+  <!-- RIGHT: scene editor (top-down world) -->
+  <section class="panel" id="scenePanel">
+    <div class="panel-head">
+      <span>Obstacle Editor</span>
+      <span class="pill" id="scenePill">CAMERA FOV 100°</span>
+    </div>
+    <canvas id="scene"></canvas>
+    <div class="toolbar">
+      <button class="tool tool--action" id="settingsBtn" aria-label="Settings">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5l1.2 2.3 2.6.5-.9 2.5 1.8 1.9-1.8 1.9.9 2.5-2.6.5L12 20.5l-1.2-2.3-2.6-.5.9-2.5-1.8-1.9 1.8-1.9-.9-2.5 2.6-.5L12 3.5Z"/>
+            <circle cx="12" cy="12" r="2.8"/>
+          </svg>
+        </span>
+        <span class="tool-label">Setup</span>
+      </button>
+      <button class="tool tool--spawn" data-spawn="car" aria-label="Add car">
+        <span class="tool-icon" aria-hidden="true">
+          <!-- Top-down car: rounded body + 4 wheels at corners (matches scene canvas) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="7" y="3" width="10" height="18" rx="2.4" fill="currentColor" fill-opacity="0.08"/>
+            <line x1="9" y1="8.5" x2="15" y2="8.5"/>
+            <line x1="9" y1="15.5" x2="15" y2="15.5"/>
+            <rect x="4.6" y="5.4" width="2.6" height="3.6" rx="0.7" fill="currentColor" stroke="none"/>
+            <rect x="16.8" y="5.4" width="2.6" height="3.6" rx="0.7" fill="currentColor" stroke="none"/>
+            <rect x="4.6" y="15" width="2.6" height="3.6" rx="0.7" fill="currentColor" stroke="none"/>
+            <rect x="16.8" y="15" width="2.6" height="3.6" rx="0.7" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span class="tool-label">Car</span>
+      </button>
+      <button class="tool tool--spawn" data-spawn="stop" aria-label="Add stop sign">
+        <span class="tool-icon" aria-hidden="true">
+          <!-- Octagonal stop sign with center "S" (matches scene canvas) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="8.8,3 15.2,3 20,7.8 20,16.2 15.2,21 8.8,21 4,16.2 4,7.8" fill="currentColor" fill-opacity="0.12"/>
+            <text x="12" y="15.4" text-anchor="middle" font-size="9.5" font-weight="700" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" fill="currentColor" stroke="none">S</text>
+          </svg>
+        </span>
+        <span class="tool-label">Stop</span>
+      </button>
+      <button class="tool tool--spawn" data-spawn="light" aria-label="Add traffic signal">
+        <span class="tool-icon" aria-hidden="true">
+          <!-- Traffic light: vertical housing + 3 stacked bulbs (matches scene canvas) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="7.5" y="3" width="9" height="18" rx="2.3" fill="currentColor" fill-opacity="0.08"/>
+            <circle cx="12" cy="7.4" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" opacity="0.55"/>
+            <circle cx="12" cy="16.6" r="1.5" fill="currentColor" stroke="none" opacity="0.3"/>
+          </svg>
+        </span>
+        <span class="tool-label">Signal</span>
+      </button>
+      <button class="tool tool--spawn" data-spawn="ped" aria-label="Add pedestrian">
+        <span class="tool-icon" aria-hidden="true">
+          <!-- Pedestrian: circle head atop body rectangle (matches scene canvas) -->
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <circle cx="12" cy="6.4" r="3.1"/>
+            <rect x="9.6" y="10.6" width="4.8" height="10.4" rx="0.5"/>
+          </svg>
+        </span>
+        <span class="tool-label">Ped</span>
+      </button>
+      <button class="tool tool--action danger" id="clearBtn" aria-label="Clear scene">
+        <span class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6l12 12M18 6 6 18"/>
+          </svg>
+        </span>
+        <span class="tool-label">Clear</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- FOOTER: telemetry -->
+  <section class="footer">
+    <div class="tile arch-tile">
+      <h4>Autonomy Stack</h4>
+      <div class="arch-row">
+        <span class="chip"><span class="dot"></span>Perception</span>
+        <span class="arrow">→</span>
+        <span class="chip"><span class="dot"></span>Predict</span>
+        <span class="arrow">→</span>
+        <span class="chip"><span class="dot"></span>Plan</span>
+        <span class="arrow">→</span>
+        <span class="chip"><span class="dot"></span>Control</span>
+      </div>
+      <div id="apolloStack" class="apollo-stack">
+        <div class="scen-row">
+          <span class="scen-pill">LANE FOLLOW</span>
+          <span class="scen-stage">CRUISE</span>
+          <span class="scen-time">0.0s</span>
+        </div>
+        <div class="rule-row"><span class="rule-chip ok">NO ACTIVE RULES</span></div>
+        <div class="scen-log-list"><div class="scen-log-empty">no transitions yet</div></div>
+      </div>
+      <div class="small" style="margin-top:6px;">
+        Plan freq: <span id="txRate">0</span> Hz · cycle: <span id="lastPacket">—</span>
+      </div>
+    </div>
+
+    <div class="tile">
+      <h4>LiDAR Range</h4>
+      <div class="row">
+        <div class="big-num" id="distVal">—<span class="unit">ft</span></div>
+        <div class="small" id="distState">—</div>
+      </div>
+      <div class="small" style="margin-top:6px;">0.3 – 36.0 ft · 1000 Hz</div>
+      <canvas class="sparkline" id="spark"></canvas>
+    </div>
+
+    <div class="tile">
+      <h4>Targets</h4>
+      <div class="det-list" id="detList">
+        <div class="small" style="opacity:0.5;">No objects in FOV — drag a prop into the lane.</div>
+      </div>
+    </div>
+
+    <div class="tile planner-tile">
+      <h4>Planner</h4>
+      <div class="planner-row">
+        <div class="planner-col planner-col--speed">
+          <div class="small planner-label">Ego Speed</div>
+          <div class="big-num planner-speed" id="speedVal">0.0<span class="unit">mph</span></div>
+        </div>
+        <div class="planner-col planner-col--state">
+          <div class="small planner-label">State</div>
+          <div class="planner-state" id="decisionVal">CLEAR</div>
+        </div>
+      </div>
+      <div class="small planner-reason" id="decisionReason">No hazards detected.</div>
+      <div class="small planner-ttc">
+        TTC: <span id="ttcVal">—</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>Simulator Settings</h2>
+    <label class="modal-row">
+      <input type="checkbox" id="chkEndless" checked>
+      Endless Autonomy (Procedural Spawning)
+    </label>
+    <button class="modal-close" id="closeSettingsBtn">Close</button>
+  </div>
+</div>
+<script>
+  document.getElementById('settingsBtn').addEventListener('click', () => {
+    document.getElementById('settingsModal').style.display = 'flex';
+  });
+  document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+    document.getElementById('settingsModal').style.display = 'none';
+  });
+  document.getElementById('chkEndless').addEventListener('change', (e) => {
+    AUTO.proceduralSpawn = e.target.checked;
+  });
+
+  // Day / Night toggle
+  const themeBtn = document.getElementById('themeToggle');
+  themeBtn.addEventListener('click', () => {
+    DARK_MODE = !DARK_MODE;
+    document.body.classList.toggle('dark-mode', DARK_MODE);
+    themeBtn.textContent = DARK_MODE ? '☾ Night' : '☀ Day';
+  });
+</script>
+</body>
+</html>

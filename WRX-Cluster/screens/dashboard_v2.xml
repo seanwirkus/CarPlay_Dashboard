@@ -1,0 +1,97 @@
+<screen>
+    <view extends="lv_obj" width="1024" height="600">
+        <style name="st_screen"/>
+
+        <lv_label text="CAM" align="top_mid" x="0" y="0"
+                  style_text_color="0xF2F4F8"
+                  style_text_font="font_16"/>
+        <lv_label text="LTE" align="top_right" x="-190" y="0"
+                  style_text_color="0xF2F4F8"
+                  style_text_font="font_12"/>
+        <lv_label text="100%" align="top_right" x="-120" y="0"
+                  style_text_color="0xF2F4F8"
+                  style_text_font="font_12"/>
+
+        <lv_label bind_text="sp_speed" align="top_left" x="74" y="80"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_48"/>
+        <lv_label text="mph" align="top_left" x="260" y="154"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_18"/>
+        <lv_bar width="250" height="10" align="top_left" x="74" y="190"
+                min_value="0" max_value="100" value="45">
+            <style name="st_bar_track"/>
+            <style name="st_bar_cool" selector="indicator"/>
+        </lv_bar>
+
+        <lv_label text="FUEL" align="top_left" x="74" y="255"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_16"/>
+        <lv_label bind_text="sp_range_mi" align="top_left" x="248" y="252"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_22"/>
+        <lv_label text="mi" align="top_left" x="300" y="257"
+                  style_text_color="0xA8ACB3"
+                  style_text_font="font_14"/>
+        <lv_bar width="250" height="10" align="top_left" x="74" y="292"
+                min_value="0" max_value="100" value="62">
+            <style name="st_bar_track"/>
+            <style name="st_bar_range" selector="indicator"/>
+        </lv_bar>
+
+        <lv_obj width="1" height="330" align="top_left" x="354" y="70"
+                style_pad_all="0" style_border_width="0"
+                style_bg_color="0x1A1D22" style_bg_opa="255"/>
+
+        <freeway_3d_view align="top_left" x="362" y="58"/>
+
+        <lv_label text="HEAD" align="top_left" x="454" y="374"
+                  style_text_color="0x34C759"
+                  style_text_font="font_18"/>
+        <lv_label bind_text="sp_heading" align="top_left" x="592" y="376"
+                  style_text_color="0xF2F4F8"
+                  style_text_font="font_16"/>
+
+        <lv_obj width="1" height="330" align="top_left" x="690" y="70"
+                style_pad_all="0" style_border_width="0"
+                style_bg_color="0x1A1D22" style_bg_opa="255"/>
+
+        <lv_obj width="44" height="44" align="top_left" x="724" y="136">
+            <style name="st_circle_chip"/>
+            <lv_label text="3" align="center"
+                      style_text_color="0xFFFFFF"
+                      style_text_font="font_22"/>
+        </lv_obj>
+        <lv_label text="Sport" align="top_right" x="-50" y="150"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_16"/>
+        <lv_bar width="250" height="10" align="top_left" x="724" y="190"
+                min_value="0" max_value="8000" bind_value="sp_rpm">
+            <style name="st_bar_track"/>
+            <style name="st_bar_warm" selector="indicator"/>
+        </lv_bar>
+        <lv_obj width="31" height="3" align="top_left" x="940" y="194"
+                style_pad_all="0" style_border_width="0"
+                style_bg_color="0xFF3B30" style_bg_opa="255"
+                style_radius="2"/>
+
+        <lv_label text="TEMP" align="top_left" x="724" y="255"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_16"/>
+        <lv_label text="195" align="top_left" x="926" y="252"
+                  style_text_color="0xFFFFFF"
+                  style_text_font="font_22"/>
+        <lv_label text="F" align="top_left" x="970" y="257"
+                  style_text_color="0xA8ACB3"
+                  style_text_font="font_14"/>
+        <lv_bar width="250" height="10" align="top_left" x="724" y="292"
+                min_value="0" max_value="100" value="52">
+            <style name="st_bar_track"/>
+            <style name="st_bar_cool" selector="indicator"/>
+        </lv_bar>
+        <lv_obj width="13" height="13" align="top_left" x="844" y="291"
+                style_pad_all="0" style_border_width="0"
+                style_bg_color="0xC436FF" style_bg_opa="255"
+                style_radius="7"/>
+    </view>
+</screen>

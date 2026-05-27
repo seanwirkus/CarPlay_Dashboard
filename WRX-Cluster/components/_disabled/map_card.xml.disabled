@@ -1,0 +1,89 @@
+<component>
+    <view extends="lv_obj" width="440" height="380">
+        <style name="st_card"/>
+
+        <!-- nav header -->
+        <lv_obj width="408" height="76" align="top_mid" y="0"
+                style_pad_all="10" style_border_width="0"
+                style_bg_color="0x1E232B" style_bg_opa="255"
+                style_radius="16">
+
+            <lv_obj width="56" height="56" align="left_mid" x="0" y="0"
+                    style_pad_all="0" style_border_width="0"
+                    style_bg_color="0xFD7E2A" style_bg_opa="255"
+                    style_radius="14">
+                <lv_label text="&#xF054;" align="center"
+                          style_text_color="0xFFFFFF"
+                          style_text_font="lv_montserrat_28"/>
+            </lv_obj>
+
+            <lv_label text="600 m" align="top_left" x="72" y="2"
+                      style_text_color="0xF2F4F8"
+                      style_text_font="lv_montserrat_22"/>
+
+            <lv_label text="Take a right onto MG Road"
+                      align="bottom_left" x="72" y="-2"
+                      style_text_color="0x8A8F99"
+                      style_text_font="lv_montserrat_12"/>
+        </lv_obj>
+
+        <!-- map area -->
+        <lv_obj width="408" height="208" align="top_mid" y="88"
+                style_pad_all="0" style_border_width="0"
+                style_bg_color="0x0A0E15" style_bg_opa="255"
+                style_radius="16">
+
+            <lv_label text="MG Road" align="top_left" x="14" y="14"
+                      style_text_color="0x8A8F99"
+                      style_text_font="lv_montserrat_12"/>
+
+            <lv_label text="St Joseph Khorabar"
+                      align="top_right" x="-14" y="32"
+                      style_text_color="0x8A8F99"
+                      style_text_font="lv_montserrat_12"/>
+
+            <lv_label text="Infant Jesus Church"
+                      align="bottom_left" x="14" y="-14"
+                      style_text_color="0x8A8F99"
+                      style_text_font="lv_montserrat_12"/>
+
+            <lv_line points="30 60; 110 90; 200 70; 240 130; 180 180"
+                     style_line_color="0xFD7E2A"
+                     style_line_width="6"
+                     style_line_rounded="true"/>
+
+            <lv_obj width="42" height="42" align="center" x="-30" y="20"
+                    style_pad_all="0" style_border_width="0"
+                    style_bg_color="0xFD7E2A" style_bg_opa="255"
+                    style_radius="9999">
+                <lv_label text="&#xF124;" align="center"
+                          style_text_color="0xFFFFFF"
+                          style_text_font="lv_montserrat_18"/>
+            </lv_obj>
+        </lv_obj>
+
+        <!-- destination footer -->
+        <lv_obj width="408" height="70" align="bottom_mid" y="0"
+                style_pad_all="12" style_border_width="0"
+                style_bg_color="0x1E232B" style_bg_opa="255"
+                style_radius="16">
+
+            <lv_label text="Club Town Gardens"
+                      align="top_left" x="0" y="0"
+                      style_text_color="0xF2F4F8"
+                      style_text_font="lv_montserrat_14"/>
+
+            <lv_label text="2 km - 3 min - MM Feeder Rd"
+                      align="bottom_left" x="0" y="0"
+                      style_text_color="0x8A8F99"
+                      style_text_font="lv_montserrat_12"/>
+
+            <lv_obj width="40" height="40" align="right_mid" x="0" y="0">
+                <style name="st_accent"/>
+                <lv_label text="&#xF054;" align="center"
+                          style_text_color="0xFFFFFF"
+                          style_text_font="lv_montserrat_18"/>
+            </lv_obj>
+        </lv_obj>
+    </view>
+</component>

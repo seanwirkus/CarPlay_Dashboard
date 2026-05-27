@@ -1,0 +1,75 @@
+<screen permanent="true">
+    <view>
+        <lv_obj x="0" y="0" width="1024" height="600">
+            <style name="st_black"/>
+
+            <!-- Top status glyph placeholders. Replace with LV_SYMBOL labels if desired. -->
+            <lv_label x="501" y="0" text="CAM" style_text_color="#f5f7fb" style_text_font="font_16"/>
+            <lv_label x="766" y="0" text="LTE" style_text_color="#f5f7fb" style_text_font="font_12"/>
+            <lv_label x="822" y="0" text="100%" style_text_color="#f5f7fb" style_text_font="font_12"/>
+
+            <!-- Left telemetry column. -->
+            <lv_label x="74" y="74" width="150" bind_text="sp_speed">
+                <style name="st_speed_text"/>
+            </lv_label>
+            <lv_label x="260" y="146" text="mph">
+                <style name="st_value_text"/>
+            </lv_label>
+            <lv_bar x="74" y="177" width="250" height="13" min_value="0" max_value="100" bind_value="sp_speed_bar">
+                <style name="st_bar_track"/>
+                <style name="st_speed_indicator" selector="indicator"/>
+            </lv_bar>
+
+            <lv_label x="74" y="245" text="FUEL" style_text_color="#f5f7fb" style_text_font="font_16"/>
+            <lv_label x="255" y="246" width="58" bind_text="sp_fuel_range">
+                <style name="st_value_text"/>
+            </lv_label>
+            <lv_label x="302" y="249" text="mi">
+                <style name="st_small_text"/>
+            </lv_label>
+            <lv_bar x="74" y="279" width="250" height="13" min_value="0" max_value="100" bind_value="sp_fuel_bar">
+                <style name="st_fuel_track"/>
+                <style name="st_fuel_indicator" selector="indicator"/>
+            </lv_bar>
+
+            <!-- Center Freeway Frenzy-style 3D sensor view. -->
+            <freeway_3d_view x="362" y="48"/>
+
+            <lv_label x="454" y="370" text="HEAD" style_text_color="#10ff59" style_text_font="font_18"/>
+            <lv_label x="571" y="371" width="95" bind_text="sp_odo">
+                <style name="st_small_text"/>
+            </lv_label>
+
+            <!-- Right drivetrain column. -->
+            <lv_obj x="724" y="124" width="40" height="40">
+                <style name="st_chip"/>
+                <lv_label x="13" y="9" bind_text="sp_gear" style_text_color="#ffffff" style_text_font="font_20"/>
+            </lv_obj>
+            <lv_label x="945" y="149" bind_text="sp_drive_mode">
+                <style name="st_small_text"/>
+            </lv_label>
+            <lv_bar x="724" y="178" width="250" height="13" min_value="0" max_value="100" bind_value="sp_rpm_bar">
+                <style name="st_rpm_track"/>
+                <style name="st_rpm_indicator" selector="indicator"/>
+            </lv_bar>
+            <lv_obj x="940" y="182" width="31" height="3" style_bg_color="#ff322f" style_bg_opa="100%" style_border_width="0" style_radius="2" style_pad_all="0"/>
+
+            <lv_label x="724" y="247" text="TEMP" style_text_color="#f5f7fb" style_text_font="font_16"/>
+            <lv_label x="926" y="247" width="58" bind_text="sp_temp">
+                <style name="st_value_text"/>
+            </lv_label>
+            <lv_label x="969" y="250" text="F">
+                <style name="st_small_text"/>
+            </lv_label>
+            <lv_bar x="724" y="279" width="250" height="13" min_value="0" max_value="100" bind_value="sp_temp_bar">
+                <style name="st_temp_track"/>
+                <style name="st_temp_indicator" selector="indicator"/>
+            </lv_bar>
+            <lv_obj x="844" y="278" width="13" height="13" style_bg_color="#ff2bc2" style_bg_opa="100%" style_border_width="0" style_radius="7" style_pad_all="0"/>
+
+            <!-- Editing handles: visible column bounds in design mode can be toggled on/off. -->
+            <lv_obj x="354" y="50" width="1" height="330" style_bg_color="#101113" style_bg_opa="100%" style_border_width="0"/>
+            <lv_obj x="690" y="50" width="1" height="330" style_bg_color="#101113" style_bg_opa="100%" style_border_width="0"/>
+        </lv_obj>
+    </view>
+</screen>

@@ -1,0 +1,25 @@
+<component>
+    <api>
+        <prop name="title" type="string" default=""/>
+        <prop name="pct"   type="int"    default="50"/>
+        <prop name="glyph" type="string" default=""/>
+    </api>
+
+    <view extends="lv_obj" width="120" height="120"
+          style_pad_all="0" style_border_width="0" style_bg_opa="0">
+
+        <lv_arc width="120" height="120" align="top_mid"
+                bg_start_angle="135" bg_end_angle="45"
+                rotation="0" value="$pct"
+                style_arc_width="12"
+                style_arc_color="0x2A2F38"/>
+
+        <lv_label text="$glyph" align="center" y="-8"
+                  style_text_color="0xFD7E2A"
+                  style_text_font="lv_montserrat_22"/>
+
+        <lv_label text="$title" align="bottom_mid" y="-2"
+                  style_text_color="0xF2F4F8"
+                  style_text_font="lv_montserrat_14"/>
+    </view>
+</component>

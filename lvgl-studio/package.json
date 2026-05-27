@@ -1,0 +1,10 @@
+{
+  "name": "lvgl-studio",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./studio-input.css -o ./studio.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,0 +1,139 @@
+<component>
+    <view extends="lv_obj" width="300" height="306">
+        <style name="st_ff_scene"/>
+
+        <lv_label x="18" y="12" text="FREEWAY">
+            <style name="st_tiny_text"/>
+        </lv_label>
+        <lv_label x="84" y="12" bind_text="ff_hud_mode" style_text_color="#22d3ee" style_text_font="font_12"/>
+        <lv_label x="223" y="12" bind_text="ff_status" style_text_color="#22d3ee" style_text_font="font_12"/>
+
+        <lv_obj x="14" y="36" width="272" height="224">
+            <style name="st_ff_sky"/>
+
+            <!-- Stacked road bands approximate the Freeway Frenzy projected road plane. -->
+            <lv_obj x="111" y="40" width="50" height="30">
+                <style name="st_ff_road_far"/>
+            </lv_obj>
+            <lv_obj x="96" y="66" width="80" height="31">
+                <style name="st_ff_road_far"/>
+            </lv_obj>
+            <lv_obj x="78" y="94" width="116" height="34">
+                <style name="st_ff_road_mid"/>
+            </lv_obj>
+            <lv_obj x="55" y="124" width="162" height="39">
+                <style name="st_ff_road_mid"/>
+            </lv_obj>
+            <lv_obj x="29" y="158" width="214" height="52">
+                <style name="st_ff_road_near"/>
+            </lv_obj>
+
+            <!-- Lane edge rails, stepped so every piece remains an editable object. -->
+            <lv_obj x="101" y="46" width="4" height="27">
+                <style name="st_ff_edge_yellow"/>
+            </lv_obj>
+            <lv_obj x="84" y="75" width="5" height="30">
+                <style name="st_ff_edge_yellow"/>
+            </lv_obj>
+            <lv_obj x="63" y="108" width="5" height="36">
+                <style name="st_ff_edge_yellow"/>
+            </lv_obj>
+            <lv_obj x="34" y="148" width="6" height="52">
+                <style name="st_ff_edge_yellow"/>
+            </lv_obj>
+            <lv_obj x="169" y="46" width="4" height="27">
+                <style name="st_ff_edge_white"/>
+            </lv_obj>
+            <lv_obj x="184" y="75" width="5" height="30">
+                <style name="st_ff_edge_white"/>
+            </lv_obj>
+            <lv_obj x="205" y="108" width="5" height="36">
+                <style name="st_ff_edge_white"/>
+            </lv_obj>
+            <lv_obj x="233" y="148" width="6" height="52">
+                <style name="st_ff_edge_white"/>
+            </lv_obj>
+
+            <!-- Center lane dashes and range ladder. -->
+            <lv_obj x="135" y="52" width="3" height="14">
+                <style name="st_ff_lane"/>
+            </lv_obj>
+            <lv_obj x="134" y="82" width="4" height="20">
+                <style name="st_ff_lane"/>
+            </lv_obj>
+            <lv_obj x="133" y="118" width="5" height="27">
+                <style name="st_ff_lane"/>
+            </lv_obj>
+            <lv_obj x="132" y="163" width="7" height="37">
+                <style name="st_ff_lane"/>
+            </lv_obj>
+            <lv_obj x="73" y="75" width="126" height="1" style_bg_color="#22d3ee" style_bg_opa="22%" style_border_width="0"/>
+            <lv_obj x="50" y="118" width="172" height="1" style_bg_color="#22d3ee" style_bg_opa="26%" style_border_width="0"/>
+            <lv_obj x="26" y="168" width="220" height="1" style_bg_color="#22d3ee" style_bg_opa="30%" style_border_width="0"/>
+            <lv_label x="143" y="62" text="60 ft">
+                <style name="st_tiny_text"/>
+            </lv_label>
+            <lv_label x="151" y="105" text="35 ft">
+                <style name="st_tiny_text"/>
+            </lv_label>
+            <lv_label x="161" y="154" text="12 ft">
+                <style name="st_tiny_text"/>
+            </lv_label>
+
+            <!-- Sensor corridor and LiDAR center ray. -->
+            <lv_obj x="116" y="57" width="3" height="140">
+                <style name="st_ff_sensor"/>
+            </lv_obj>
+            <lv_obj x="154" y="57" width="3" height="140">
+                <style name="st_ff_sensor"/>
+            </lv_obj>
+            <lv_obj x="136" y="47" width="2" height="157">
+                <style name="st_ff_lidar"/>
+            </lv_obj>
+            <lv_obj x="129" y="88" width="16" height="16" style_bg_color="#ffffff" style_bg_opa="100%" style_border_width="0" style_radius="8" style_pad_all="0"/>
+
+            <!-- Sensor target cars. These can later be moved/bound from real detections. -->
+            <lv_obj x="119" y="70" width="35" height="28">
+                <style name="st_ff_alert_body"/>
+                <lv_obj x="8" y="5" width="19" height="9">
+                    <style name="st_ff_glass"/>
+                </lv_obj>
+            </lv_obj>
+            <lv_obj x="113" y="65" width="47" height="39">
+                <style name="st_ff_detect"/>
+            </lv_obj>
+            <lv_obj x="58" y="116" width="39" height="31">
+                <style name="st_ff_target_body"/>
+                <lv_obj x="8" y="6" width="23" height="9">
+                    <style name="st_ff_glass"/>
+                </lv_obj>
+            </lv_obj>
+            <lv_obj x="185" y="129" width="47" height="36">
+                <style name="st_ff_target_body"/>
+                <lv_obj x="9" y="6" width="28" height="11">
+                    <style name="st_ff_glass"/>
+                </lv_obj>
+            </lv_obj>
+
+            <!-- Ego car in the center view. -->
+            <lv_obj x="89" y="159" width="94" height="54" style_bg_color="#000000" style_bg_opa="55%" style_border_width="0" style_radius="18" style_pad_all="0"/>
+            <lv_obj x="92" y="145" width="88" height="68">
+                <style name="st_ff_ego_body"/>
+                <lv_obj x="19" y="7" width="50" height="23">
+                    <style name="st_ff_ego_roof"/>
+                </lv_obj>
+                <lv_obj x="26" y="13" width="36" height="12">
+                    <style name="st_ff_glass"/>
+                </lv_obj>
+                <lv_obj x="13" y="39" width="13" height="8" style_bg_color="#ef4444" style_bg_opa="100%" style_border_width="0" style_radius="3"/>
+                <lv_obj x="62" y="39" width="13" height="8" style_bg_color="#ef4444" style_bg_opa="100%" style_border_width="0" style_radius="3"/>
+                <lv_obj x="35" y="48" width="18" height="8" style_bg_color="#e2e8f0" style_bg_opa="100%" style_border_width="0" style_radius="3"/>
+            </lv_obj>
+        </lv_obj>
+
+        <lv_label x="18" y="268" bind_text="ff_lidar" style_text_color="#f43f5e" style_text_font="font_12"/>
+        <lv_label x="123" y="268" bind_text="ff_target_range" style_text_color="#f8fafc" style_text_font="font_12"/>
+        <lv_label x="218" y="268" bind_text="ff_left_sensor" style_text_color="#22d3ee" style_text_font="font_12"/>
+        <lv_label x="251" y="268" bind_text="ff_right_sensor" style_text_color="#22d3ee" style_text_font="font_12"/>
+    </view>
+</component>

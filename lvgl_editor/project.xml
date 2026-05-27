@@ -1,0 +1,7 @@
+<project>
+    <targets>
+        <target name="esp32_s3_waveshare_1024x600">
+            <display width="1024" height="600"/>
+        </target>
+    </targets>
+</project>

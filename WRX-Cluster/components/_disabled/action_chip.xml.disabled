@@ -1,0 +1,19 @@
+<component>
+    <api>
+        <prop name="title" type="string" default=""/>
+        <prop name="glyph" type="string" default=""/>
+    </api>
+
+    <view extends="lv_obj" width="76" height="84"
+          style_pad_all="0" style_border_width="0" style_bg_opa="0">
+        <lv_obj width="48" height="48" align="top_mid" y="0">
+            <style name="st_circle_chip"/>
+            <lv_label text="$glyph" align="center"
+                      style_text_color="0xF2F4F8"
+                      style_text_font="lv_montserrat_20"/>
+        </lv_obj>
+        <lv_label text="$title" align="bottom_mid" y="0"
+                  style_text_color="0xB8BCC4"
+                  style_text_font="lv_montserrat_12"/>
+    </view>
+</component>

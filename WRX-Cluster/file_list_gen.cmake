@@ -1,0 +1,14 @@
+set(LV_EDITOR_PROJECT_SOURCES)
+list(
+  APPEND
+  LV_EDITOR_PROJECT_SOURCES
+  ${CMAKE_CURRENT_LIST_DIR}/components/freeway_3d_view_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_12_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_14_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_16_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_18_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_22_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_48_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/dashboard_v2_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/WRX_Cluster_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/WRX_Cluster.c)

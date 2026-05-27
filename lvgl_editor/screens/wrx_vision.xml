@@ -1,0 +1,61 @@
+<screen permanent="true">
+    <view>
+        <lv_obj x="0" y="0" width="1024" height="600">
+            <style name="st_black"/>
+
+            <!-- Top Header: Title and FPS -->
+            <lv_label x="30" y="20" text="RetroVision Perception HUD" style_text_color="#f5f7fb" style_text_font="font_20"/>
+            <lv_label x="320" y="24" width="80" bind_text="sp_fps" text="60 fps">
+                <style name="st_small_text"/>
+            </lv_label>
+
+            <!-- Center: 3D Render Area (Matches app.js canvas) -->
+            <!-- We center the 3D view roughly in the middle like dashboard_v2 -->
+            <freeway_3d_view x="312" y="50"/>
+
+            <!-- Left Panel: LiDAR & Targets -->
+            <lv_label x="30" y="100" text="LiDAR RANGE" style_text_color="#f5f7fb" style_text_font="font_16"/>
+            <lv_label x="30" y="130" width="120" bind_text="sp_dist_val" text="---">
+                <style name="st_value_text"/>
+            </lv_label>
+            <lv_label x="150" y="135" text="ft">
+                <style name="st_small_text"/>
+            </lv_label>
+            
+            <lv_label x="30" y="200" text="TARGETS" style_text_color="#f5f7fb" style_text_font="font_16"/>
+            <!-- Placeholder for detected targets list -->
+            <lv_label x="30" y="230" width="200" bind_text="sp_targets_list" text="No objects in FOV">
+                <style name="st_small_text"/>
+            </lv_label>
+
+            <!-- Right Panel: Planner Telemetry -->
+            <lv_label x="750" y="100" text="PLANNER" style_text_color="#f5f7fb" style_text_font="font_16"/>
+            
+            <lv_label x="750" y="140" text="EGO SPEED" style_text_color="#888888" style_text_font="font_12"/>
+            <lv_label x="750" y="165" width="100" bind_text="sp_speed" text="0.0">
+                <style name="st_speed_text"/>
+            </lv_label>
+            <lv_label x="860" y="170" text="mph">
+                <style name="st_value_text"/>
+            </lv_label>
+
+            <lv_label x="750" y="240" text="STATE" style_text_color="#888888" style_text_font="font_12"/>
+            <lv_label x="750" y="265" width="150" bind_text="sp_decision" text="CLEAR" style_text_color="#34d399">
+                <style name="st_value_text"/>
+            </lv_label>
+            
+            <lv_label x="750" y="310" width="250" bind_text="sp_decision_reason" text="No hazards detected.">
+                <style name="st_small_text"/>
+            </lv_label>
+
+            <lv_label x="750" y="360" text="TTC:" style_text_color="#888888" style_text_font="font_16"/>
+            <lv_label x="800" y="360" width="100" bind_text="sp_ttc" text="---">
+                <style name="st_small_text"/>
+            </lv_label>
+
+            <!-- Editing handles boundary lines for UI consistency -->
+            <lv_obj x="280" y="50" width="1" height="500" style_bg_color="#101113" style_bg_opa="100%" style_border_width="0"/>
+            <lv_obj x="730" y="50" width="1" height="500" style_bg_color="#101113" style_bg_opa="100%" style_border_width="0"/>
+        </lv_obj>
+    </view>
+</screen>

@@ -1,0 +1,25 @@
+.pio/build/s3-lvgl-studio/lib244/lvgl/misc/lv_style_gen.c.o: \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_style_gen.c \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_style.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../font/lv_font.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../font/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../font/../lv_conf_kconfig.h \
+ /Users/sean/Library/Arduino15/packages/esp32-XIP-3.1.1/tools/esp32-arduino-libs/idf-release_v5.3-cfea4f7c-v1/esp32s3/qio_opi/include/sdkconfig.h \
+ /Users/sean/Library/Arduino15/packages/esp32-XIP-3.1.1/tools/esp32-arduino-libs/idf-release_v5.3-cfea4f7c-v1/esp32s3/include/esp_common/include/esp_attr.h \
+ lvgl-studio/runtime/LVGL_Studio_Flash/lv_conf.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../font/lv_symbol_def.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../font/../misc/lv_area.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../font/../misc/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_color.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_assert.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_log.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_types.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_mem.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_math.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_area.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_anim.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_txt.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_printf.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_bidi.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_style_gen.h

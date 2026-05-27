@@ -1,0 +1,224 @@
+{
+  "A": {
+    "12": {
+      "color": "LT GRN",
+      "fn": "TRANSMISSIONS"
+    },
+    "14": {
+      "color": "GRN/RED",
+      "fn": ""
+    },
+    "13": {
+      "color": "RED/BLU",
+      "fn": "SYSTEM"
+    },
+    "11": {
+      "color": "WHT",
+      "fn": ""
+    },
+    "10": {
+      "color": "RED/BLK",
+      "fn": ""
+    },
+    "9": {
+      "color": "WHT/GRN",
+      "fn": "WHT/GRN"
+    },
+    "5": {
+      "color": "BLU/BLK",
+      "fn": "SYSTEM"
+    },
+    "8": {
+      "color": "BLK/WHT",
+      "fn": "BLK/RED"
+    },
+    "7": {
+      "color": "BLK/GRN",
+      "fn": ""
+    },
+    "6": {
+      "color": "RED/WHT",
+      "fn": ""
+    },
+    "4": {
+      "color": "YEL/BLK",
+      "fn": ""
+    },
+    "3": {
+      "color": null,
+      "fn": ""
+    },
+    "2": {
+      "color": "BRN/WHT",
+      "fn": "fuel sender / gauge input -> C3 GPIO2 (ADC)"
+    },
+    "1": {
+      "color": "LT BLU",
+      "fn": "SYSTEM"
+    }
+  },
+  "B": {
+    "30": {
+      "color": "BLU/WHT",
+      "fn": ""
+    },
+    "27": {
+      "color": null,
+      "fn": ""
+    },
+    "28": {
+      "color": "BLU/RED",
+      "fn": ""
+    },
+    "29": {
+      "color": "RED",
+      "fn": ""
+    },
+    "23": {
+      "color": null,
+      "fn": ""
+    },
+    "26": {
+      "color": null,
+      "fn": ""
+    },
+    "25": {
+      "color": null,
+      "fn": ""
+    },
+    "24": {
+      "color": null,
+      "fn": ""
+    },
+    "20": {
+      "color": null,
+      "fn": ""
+    },
+    "22": {
+      "color": null,
+      "fn": ""
+    },
+    "21": {
+      "color": "GRN/YEL",
+      "fn": ""
+    },
+    "16": {
+      "color": null,
+      "fn": ""
+    },
+    "18": {
+      "color": "GRN/RED",
+      "fn": ""
+    },
+    "19": {
+      "color": "RED/YEL",
+      "fn": "LT GRN LT GRN"
+    },
+    "17": {
+      "color": null,
+      "fn": ""
+    },
+    "14": {
+      "color": "YEL",
+      "fn": "YEL"
+    },
+    "13": {
+      "color": "BLU/WHT",
+      "fn": "BLU/WHT"
+    },
+    "15": {
+      "color": null,
+      "fn": ""
+    },
+    "9": {
+      "color": "BLK/BLU",
+      "fn": ""
+    },
+    "12": {
+      "color": "YEL/BLK",
+      "fn": ""
+    },
+    "10": {
+      "color": null,
+      "fn": ""
+    },
+    "11": {
+      "color": "BLK/PNK",
+      "fn": "BLK/PNK"
+    },
+    "7": {
+      "color": null,
+      "fn": ""
+    },
+    "8": {
+      "color": "BLK/BLU",
+      "fn": "BLK/BLU"
+    },
+    "6": {
+      "color": "BRN/RED",
+      "fn": ""
+    },
+    "2": {
+      "color": "GRN/BLK",
+      "fn": "GRN/WHT BRN/BLK"
+    },
+    "5": {
+      "color": "YEL/GRN",
+      "fn": "SYSTEM"
+    },
+    "3": {
+      "color": "LT GRN/YEL",
+      "fn": ""
+    },
+    "4": {
+      "color": "YEL/RED",
+      "fn": ""
+    },
+    "1": {
+      "color": "BLK/WHT",
+      "fn": ""
+    }
+  },
+  "C": {
+    "10": {
+      "color": "BLU/RED",
+      "fn": "signal"
+    },
+    "9": {
+      "color": "ORG/WHT",
+      "fn": "signal"
+    },
+    "8": {
+      "color": "WHT/RED",
+      "fn": "NOT POPULATED - confirmed visually"
+    },
+    "7": {
+      "color": "RED",
+      "fn": "NOT POPULATED - confirmed visually"
+    },
+    "6": {
+      "color": "BLK",
+      "fn": "signal GROUND"
+    },
+    "5": {
+      "color": "BLU/GRN",
+      "fn": "TACH from ECM -> C3 GPIO4"
+    },
+    "4": {
+      "color": null,
+      "fn": "(empty)"
+    },
+    "3": {
+      "color": "LT GRN/BLK",
+      "fn": "signal"
+    },
+    "2": {
+      "color": "GRN/BLK",
+      "fn": "VSS speed -> C3 GPIO7"
+    },
+    "1": {
+      "color": null,
+      "fn": "(empty)"
+    }
+  }
+}

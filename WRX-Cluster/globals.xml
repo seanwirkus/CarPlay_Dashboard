@@ -1,0 +1,201 @@
+<globals>
+    <api>
+    </api>
+
+    <consts>
+        <color name="col_bg"       value="0x000000"/>
+        <color name="col_white"    value="0xFFFFFF"/>
+        <color name="col_muted"    value="0x6E7178"/>
+        <color name="col_sub"      value="0xA8ACB3"/>
+        <color name="col_chip"    value="0x3A3D44"/>
+        <color name="col_orange"   value="0xFD7E2A"/>
+        <color name="col_blue"     value="0x0A84FF"/>
+        <color name="col_green"    value="0x34C759"/>
+        <color name="col_yellow"   value="0xFFCC00"/>
+        <color name="col_red"      value="0xFF3B30"/>
+        <color name="col_cyan"     value="0x32D9FF"/>
+        <color name="col_magenta"  value="0xC436FF"/>
+        <color name="col_track"    value="0x14171C"/>
+    </consts>
+
+    <styles>
+        <style name="st_screen"
+               bg_color="#col_bg" bg_opa="255"
+               border_width="0" pad_all="0"
+               text_color="#col_white"/>
+
+        <style name="st_bar_track"
+               bg_color="#col_track" bg_opa="255"
+               radius="6" border_width="0"
+               pad_all="0"/>
+
+        <style name="st_bar_cool"
+               bg_color="#col_cyan" bg_opa="255"
+               bg_grad_color="#col_magenta"
+               bg_grad_dir="hor"
+               radius="6"/>
+
+        <style name="st_bar_warm"
+               bg_color="#col_yellow" bg_opa="255"
+               bg_grad_color="#col_red"
+               bg_grad_dir="hor"
+               radius="6"/>
+
+        <style name="st_bar_nav"
+               bg_color="#col_blue" bg_opa="255"
+               radius="6"/>
+
+        <style name="st_bar_range"
+               bg_color="#col_green" bg_opa="255"
+               radius="6"/>
+
+        <style name="st_circle_chip"
+               bg_color="#col_chip" bg_opa="255"
+               radius="9999" border_width="0"
+               text_color="#col_white"/>
+
+        <style name="st_ghost"
+               pad_all="0" border_width="0" bg_opa="0"/>
+
+        <style name="st_ff_scene"
+               bg_color="0x06080B" bg_opa="255"
+               border_width="0" radius="26"
+               pad_all="0"/>
+
+        <style name="st_ff_sky"
+               bg_color="0x0C1118" bg_opa="255"
+               border_width="0" radius="20"
+               pad_all="0"/>
+
+        <style name="st_ff_road_far"
+               bg_color="0x171C24" bg_opa="255"
+               border_width="0" radius="4"
+               pad_all="0"/>
+
+        <style name="st_ff_road_mid"
+               bg_color="0x222A35" bg_opa="255"
+               border_width="0" radius="5"
+               pad_all="0"/>
+
+        <style name="st_ff_road_near"
+               bg_color="0x323C4C" bg_opa="255"
+               border_width="0" radius="6"
+               pad_all="0"/>
+
+        <style name="st_ff_lane"
+               bg_color="0xEEF4FF" bg_opa="235"
+               border_width="0" radius="2"
+               pad_all="0"/>
+
+        <style name="st_ff_edge_yellow"
+               bg_color="#col_yellow" bg_opa="255"
+               border_width="0" radius="2"
+               pad_all="0"/>
+
+        <style name="st_ff_edge_white"
+               bg_color="#col_white" bg_opa="255"
+               border_width="0" radius="2"
+               pad_all="0"/>
+
+        <style name="st_ff_sensor"
+               bg_color="#col_cyan" bg_opa="150"
+               border_width="0" radius="2"
+               pad_all="0"/>
+
+        <style name="st_ff_lidar"
+               bg_color="#col_red" bg_opa="215"
+               border_width="0" radius="2"
+               pad_all="0"/>
+
+        <style name="st_ff_detect"
+               bg_opa="0" border_width="1"
+               border_color="#col_cyan"
+               radius="6" pad_all="0"/>
+
+        <style name="st_ff_ego_body"
+               bg_color="0xDCE6F2" bg_opa="255"
+               border_width="1" border_color="#col_white"
+               radius="5" pad_all="0"/>
+
+        <style name="st_ff_ego_roof"
+               bg_color="0x94A3B8" bg_opa="255"
+               border_width="0" radius="3"
+               pad_all="0"/>
+
+        <style name="st_ff_glass"
+               bg_color="0x161920" bg_opa="255"
+               border_width="0" radius="2"
+               pad_all="0"/>
+
+        <style name="st_ff_target_body"
+               bg_color="0x586474" bg_opa="255"
+               border_width="1" border_color="0xCBD5E1"
+               radius="3" pad_all="0"/>
+
+        <style name="st_ff_alert_body"
+               bg_color="0xB91C1C" bg_opa="255"
+               border_width="1" border_color="0xFECACA"
+               radius="3" pad_all="0"/>
+
+        <style name="st_ff_car_shadow"
+               bg_color="0x000000" bg_opa="130"
+               border_width="0" radius="4" pad_all="0"/>
+
+        <style name="st_ff_car_wheel"
+               bg_color="0x030305" bg_opa="255"
+               border_width="1" border_color="0x27272A"
+               radius="2" pad_all="0"/>
+
+        <style name="st_ff_body_hi"
+               bg_color="0xF8FAFC" bg_opa="90"
+               border_width="0" radius="1" pad_all="0"/>
+
+        <style name="st_ff_body_lo"
+               bg_color="0x020617" bg_opa="85"
+               border_width="0" radius="1" pad_all="0"/>
+
+        <style name="st_ff_bumper"
+               bg_color="0x111827" bg_opa="255"
+               border_width="0" radius="2" pad_all="0"/>
+
+        <style name="st_ff_headlight"
+               bg_color="0xCFFAFE" bg_opa="230"
+               border_width="0" radius="1" pad_all="0"/>
+
+        <style name="st_ff_taillight"
+               bg_color="0xEF4444" bg_opa="255"
+               border_width="0" radius="1" pad_all="0"/>
+
+        <style name="st_ff_plate"
+               bg_color="0xE2E8F0" bg_opa="235"
+               border_width="0" radius="1" pad_all="0"/>
+    </styles>
+
+    <subjects>
+        <int    name="sp_speed"    value="45"/>
+        <int    name="sp_rpm"      value="2880"/>
+        <int    name="sp_range_mi" value="207"/>
+        <int    name="sp_heading"  value="342"/>
+        <string name="sp_street"   value="24th Street"/>
+        <string name="sp_dist"     value="0.2 mi"/>
+        <string name="sp_eta"      value="10:12 PM"/>
+        <string name="ff_hud_mode" value="3D"/>
+        <string name="ff_status" value="TRACK"/>
+        <string name="ff_target_range" value="42 ft"/>
+        <string name="ff_lidar" value="LiDAR 42ft"/>
+        <string name="ff_left_sensor" value="L OK"/>
+        <string name="ff_right_sensor" value="R OK"/>
+    </subjects>
+
+    <images>
+    </images>
+
+    <fonts>
+        <bin as_file="false" name="font_12" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="12" bpp="4"/>
+        <bin as_file="false" name="font_14" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="14" bpp="4"/>
+        <bin as_file="false" name="font_16" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="16" bpp="4"/>
+        <bin as_file="false" name="font_18" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="18" bpp="4"/>
+        <bin as_file="false" name="font_22" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="22" bpp="4"/>
+        <bin as_file="false" name="font_48" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="48" bpp="4"/>
+    </fonts>
+</globals>

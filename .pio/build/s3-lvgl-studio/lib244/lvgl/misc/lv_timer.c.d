@@ -1,0 +1,32 @@
+.pio/build/s3-lvgl-studio/lib244/lvgl/misc/lv_timer.c.o: \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_timer.c \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_timer.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../lv_conf_kconfig.h \
+ /Users/sean/Library/Arduino15/packages/esp32-XIP-3.1.1/tools/esp32-arduino-libs/idf-release_v5.3-cfea4f7c-v1/esp32s3/qio_opi/include/sdkconfig.h \
+ /Users/sean/Library/Arduino15/packages/esp32-XIP-3.1.1/tools/esp32-arduino-libs/idf-release_v5.3-cfea4f7c-v1/esp32s3/include/esp_common/include/esp_attr.h \
+ lvgl-studio/runtime/LVGL_Studio_Flash/lv_conf.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../hal/lv_hal_tick.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../hal/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_assert.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_log.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_types.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_mem.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_ll.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/lv_gc.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/lv_img_cache.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/lv_img_decoder.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/lv_img_buf.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_color.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/../lv_conf_internal.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_assert.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_math.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_types.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_area.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_fs.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_types.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/lv_draw_mask.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../draw/../misc/lv_math.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../core/lv_obj_pos.h \
+ .pio/libdeps/s3-lvgl-studio/lvgl/src/misc/../core/../misc/lv_area.h

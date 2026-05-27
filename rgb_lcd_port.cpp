@@ -42,12 +42,12 @@ esp_lcd_panel_handle_t waveshare_esp32_s3_rgb_lcd_init()
             .pclk_hz = EXAMPLE_LCD_PIXEL_CLOCK_HZ, // Pixel clock frequency in Hz
             .h_res = EXAMPLE_LCD_H_RES,            // Horizontal resolution (number of pixels per row)
             .v_res = EXAMPLE_LCD_V_RES,            // Vertical resolution (number of rows)
-            .hsync_pulse_width = 20,                // Horizontal sync pulse width - reduced for compatibility
-            .hsync_back_porch = 50,                 // Horizontal back porch - reduced for compatibility
-            .hsync_front_porch = 160,                // Horizontal front porch - increased for compatibility
-            .vsync_pulse_width = 10,                // Vertical sync pulse width - reduced for compatibility
-            .vsync_back_porch = 20,                 // Vertical back porch - increased for compatibility
-            .vsync_front_porch = 10,                // Vertical front porch - increased for compatibility
+            .hsync_pulse_width = 162,              // Known-good 7B timing (FreewayFrenzy)
+            .hsync_back_porch = 152,               // Known-good 7B timing (FreewayFrenzy)
+            .hsync_front_porch = 48,               // Known-good 7B timing (FreewayFrenzy)
+            .vsync_pulse_width = 45,               // Known-good 7B timing (FreewayFrenzy)
+            .vsync_back_porch = 13,                // Known-good 7B timing (FreewayFrenzy)
+            .vsync_front_porch = 3,                // Known-good 7B timing (FreewayFrenzy)
             .flags = {
                 .pclk_active_neg = 1, // Set pixel clock polarity to active low
             },
@@ -220,4 +220,7 @@ void wavesahre_rgb_lcd_bl_on()
 void wavesahre_rgb_lcd_bl_off()
 {
     IO_EXTENSION_Output(IO_EXTENSION_IO_2,0);  // Backlight OFF configuration
+}
+void waveshare_rgb_lcd_draw_bitmap(int x1, int y1, int x2, int y2, void *color_data) {
+    esp_lcd_panel_draw_bitmap(panel_handle, x1, y1, x2, y2, color_data);
 }
