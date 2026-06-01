@@ -1,7 +1,0 @@
-<project lvgl_version="9.5.0">
-    <targets>
-        <target name="dashboard_v2">
-            <display width="1024" height="600"/>
-        </target>
-    </targets>
-</project>

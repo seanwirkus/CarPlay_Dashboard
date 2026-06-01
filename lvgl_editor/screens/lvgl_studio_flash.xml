@@ -1,0 +1,135 @@
+<screen permanent="true">
+	<view>
+		<lv_obj x="0" y="0" width="1024" height="600">
+			<style name="st_black" />
+
+			<!-- ============ TOP WARNING STRIP (centered, inside safe area) ============ -->
+			<lv_obj x="152" y="8" width="720" height="44" style_bg_opa="0%" style_border_width="0" style_pad_all="0">
+				<lv_label x="20"  y="10" text="&#xF7E1;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="110" y="10" text="&#xF30D;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="200" y="10" text="&#xF188;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="290" y="10" text="&#xF333;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="380" y="10" text="&#xF4E1;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="470" y="10" text="&#xF337;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="560" y="10" text="&#xF5CD;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+				<lv_label x="650" y="10" text="&#xF3E5;" style_text_color="0x4f6077" style_text_font="bs_icons_24" />
+			</lv_obj>
+
+			<!-- ============ TURN INDICATORS ============ -->
+			<lv_label x="456" y="62" text="&#xF12F;" style_text_color="0x1a2230" style_text_font="bs_icons_48" />
+			<lv_label x="540" y="62" text="&#xF138;" style_text_color="0x1a2230" style_text_font="bs_icons_48" />
+
+			<!-- ============ LEFT GAUGE: RPM (center 244,300 — arc 400×400) ============ -->
+			<lv_arc
+				x="44"
+				y="100"
+				width="400"
+				height="400"
+				bg_start_angle="135"
+				bg_end_angle="45"
+				start_angle="135"
+				end_angle="45"
+				min_value="0"
+				max_value="100"
+				value="0"
+				bind_value="sp_rpm_bar"
+			>
+				<style name="st_arc_track_rpm" />
+				<style name="st_arc_fill_rpm" selector="indicator" />
+				<style name="st_arc_knob_hidden" selector="knob" />
+			</lv_arc>
+			<lv_label x="144" y="260" width="200" height="90" bind_text="flash_rpm" style_text_align="center">
+				<style name="st_speed_text" />
+			</lv_label>
+			<lv_label
+				x="194"
+				y="358"
+				width="100"
+				text="RPM"
+				style_text_align="center"
+				style_text_color="0x6f86a4"
+				style_text_font="font_32"
+				height="40"
+			/>
+
+			<!-- ============ CENTER TELEMETRY CONSOLE (x=512 center) ============ -->
+			<lv_obj x="472" y="148" width="80" height="80">
+				<style name="st_chip" />
+				<lv_label
+					x="0"
+					y="8"
+					width="80"
+					style_text_align="center"
+					bind_text="sp_gear"
+					style_text_color="0xffffff"
+					style_text_font="font_48"
+					height="48"
+				/>
+			</lv_obj>
+			<lv_label
+				x="442"
+				y="296"
+				width="140"
+				style_text_align="center"
+				bind_text="sp_drive_mode"
+				style_text_color="0x6f86a4"
+				style_text_font="font_16"
+			/>
+			<lv_label
+				x="442"
+				y="320"
+				width="140"
+				style_text_align="center"
+				bind_text="sp_odo"
+				style_text_color="0x3d5c78"
+				style_text_font="font_12"
+			/>
+
+			<!-- ============ RIGHT GAUGE: MPH (center 780,300 — arc 400×400) ============ -->
+			<lv_arc
+				x="580"
+				y="100"
+				width="400"
+				height="400"
+				bg_start_angle="135"
+				bg_end_angle="45"
+				start_angle="135"
+				end_angle="45"
+				min_value="0"
+				max_value="100"
+				value="0"
+				bind_value="sp_speed_bar"
+			>
+				<style name="st_arc_track_mph" />
+				<style name="st_arc_fill_mph" selector="indicator" />
+				<style name="st_arc_knob_hidden" selector="knob" />
+			</lv_arc>
+			<lv_label x="680" y="260" width="200" height="90" bind_text="flash_mph" style_text_align="center">
+				<style name="st_speed_text" />
+			</lv_label>
+			<lv_label
+				x="730"
+				y="358"
+				width="100"
+				text="MPH"
+				style_text_align="center"
+				style_text_color="0x6f86a4"
+				style_text_font="font_32"
+				height="40"
+			/>
+
+			<!-- ============ FUEL STRIP (centered in safe area) ============ -->
+			<lv_label x="312" y="514" text="FUEL" style_text_color="0x6f86a4" style_text_font="font_16" />
+			<lv_label x="640" y="514" width="64" bind_text="flash_fuel">
+				<style name="st_small_text" />
+			</lv_label>
+			<lv_bar x="312" y="538" width="400" height="24" min_value="0" max_value="100" bind_value="flash_fuel_bar">
+				<style name="st_fuel_track" />
+				<style name="st_fuel_indicator" selector="indicator" />
+			</lv_bar>
+
+			<lv_label x="730" y="538" text="SYSTEM CHECK" style_text_color="0x3d5c78" style_text_font="font_16" />
+			<lv_label x="730" y="560" text="SEARCHING" style_text_color="0x6f86a4" style_text_font="font_12" />
+		</lv_obj>
+	</view>
+</screen>

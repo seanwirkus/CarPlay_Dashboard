@@ -37,18 +37,22 @@ bool waveshare_7b_display_begin()
 
     ESP_LOGI(TAG, "Install RGB LCD panel driver");
 
+    // Tight porches → higher refresh. At 30 MHz pclk:
+    //   h_total = 1024 + 8 + 12 + 8 = 1052
+    //   v_total = 600  + 4 + 8  + 8 = 620
+    //   refresh ≈ 30e6 / (1052 × 620) ≈ 46 Hz  (was 32.7 Hz with vendor porches)
     esp_lcd_rgb_panel_config_t panel_config = {
         .clk_src = LCD_CLK_SRC_DEFAULT,
         .timings = {
             .pclk_hz = WS7B_LCD_PIXEL_CLOCK_HZ,
             .h_res = WS7B_LCD_H_RES,
             .v_res = WS7B_LCD_V_RES,
-            .hsync_pulse_width = 162,
-            .hsync_back_porch = 152,
-            .hsync_front_porch = 48,
-            .vsync_pulse_width = 45,
-            .vsync_back_porch = 13,
-            .vsync_front_porch = 3,
+            .hsync_pulse_width = 8,
+            .hsync_back_porch = 12,
+            .hsync_front_porch = 8,
+            .vsync_pulse_width = 4,
+            .vsync_back_porch = 8,
+            .vsync_front_porch = 8,
             .flags = {
                 .pclk_active_neg = 1,
             },

@@ -1,11 +1,16 @@
 <globals>
     <fonts>
-        <bin as_file="false" name="font_12" src_path="/System/Library/Fonts/Supplemental/Arial.ttf" range="0x20-0x7f" size="12" bpp="4"/>
-        <bin as_file="false" name="font_16" src_path="/System/Library/Fonts/Supplemental/Arial.ttf" range="0x20-0x7f" size="16" bpp="4"/>
-        <bin as_file="false" name="font_18" src_path="/System/Library/Fonts/Supplemental/Arial.ttf" range="0x20-0x7f" size="18" bpp="4"/>
-        <bin as_file="false" name="font_20" src_path="/System/Library/Fonts/Supplemental/Arial.ttf" range="0x20-0x7f" size="20" bpp="4"/>
-        <bin as_file="false" name="font_24" src_path="/System/Library/Fonts/Supplemental/Arial.ttf" range="0x20-0x7f" size="24" bpp="4"/>
-        <bin as_file="false" name="font_48" src_path="/System/Library/Fonts/Supplemental/Arial.ttf" range="0x20-0x7f" size="48" bpp="4"/>
+        <bin as_file="false" name="font_12" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="12" bpp="4"/>
+        <bin as_file="false" name="font_16" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="16" bpp="4"/>
+        <bin as_file="false" name="font_18" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="18" bpp="4"/>
+        <bin as_file="false" name="font_20" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="20" bpp="4"/>
+        <bin as_file="false" name="font_24" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="24" bpp="4"/>
+        <bin as_file="false" name="font_32" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="32" bpp="4"/>
+        <bin as_file="false" name="font_48" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="48" bpp="4"/>
+        <bin as_file="false" name="font_64" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="64" bpp="4"/>
+        <bin as_file="false" name="font_96" src_path="fonts/Arial.ttf" range="0x20-0x7f" size="96" bpp="4"/>
+        <bin as_file="false" name="bs_icons_24" src_path="../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff" range="0xF3E5,0xF30D,0xF188,0xF333,0xF4E1,0xF337,0xF5CD,0xF7E1" size="24" bpp="4"/>
+        <bin as_file="false" name="bs_icons_48" src_path="../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff" range="0xF12F,0xF138,0xF188,0xF30D,0xF333,0xF337,0xF3E5,0xF4E1,0xF5CD,0xF7E1" size="48" bpp="4"/>
     </fonts>
 
     <subjects>
@@ -25,50 +30,59 @@
         <string name="ff_lidar" value="LiDAR 42ft"/>
         <string name="ff_left_sensor" value="L OK"/>
         <string name="ff_right_sensor" value="R OK"/>
+        <string name="flash_rpm" value="0"/>
+        <string name="flash_mph" value="0"/>
+        <string name="flash_fuel" value="-- %"/>
+        <int name="flash_fuel_bar" value="0"/>
     </subjects>
 
     <styles>
-        <style name="st_black" bg_color="#020305" bg_opa="100%" border_width="0" radius="0" pad_all="0"/>
-        <style name="st_panel" bg_color="#101113" bg_opa="100%" border_width="0" radius="28" pad_all="0"/>
-        <style name="st_panel_soft" bg_color="#191a1d" bg_opa="70%" border_width="0" radius="18" pad_all="0"/>
-        <style name="st_text_primary" text_color="#f5f7fb"/>
-        <style name="st_text_secondary" text_color="#d8dbe2"/>
-        <style name="st_text_muted" text_color="#8c919b"/>
-        <style name="st_text_dim" text_color="#444951"/>
-        <style name="st_speed_text" text_color="#f5f7fb" text_font="font_48"/>
-        <style name="st_value_text" text_color="#f5f7fb" text_font="font_24"/>
-        <style name="st_small_text" text_color="#d8dbe2" text_font="font_16"/>
-        <style name="st_tiny_text" text_color="#8c919b" text_font="font_12"/>
-        <style name="st_bar_track" bg_color="#35101d" bg_opa="100%" radius="6" border_width="0" pad_all="0"/>
-        <style name="st_speed_indicator" bg_color="#ff1162" bg_opa="100%" radius="6"/>
-        <style name="st_fuel_track" bg_color="#09330f" bg_opa="100%" radius="6" border_width="0" pad_all="0"/>
-        <style name="st_fuel_indicator" bg_color="#12d31f" bg_opa="100%" radius="6"/>
-        <style name="st_rpm_track" bg_color="#3a3108" bg_opa="100%" radius="6" border_width="0" pad_all="0"/>
-        <style name="st_rpm_indicator" bg_color="#ffd21a" bg_opa="100%" radius="6"/>
-        <style name="st_temp_track" bg_color="#32102b" bg_opa="100%" radius="6" border_width="0" pad_all="0"/>
-        <style name="st_temp_indicator" bg_color="#d719b9" bg_opa="100%" radius="6"/>
-        <style name="st_blue_indicator" bg_color="#0a84ff" bg_opa="100%" radius="5"/>
-        <style name="st_road" bg_color="#222326" bg_opa="100%" border_width="0" radius="4" pad_all="0"/>
-        <style name="st_road_line" bg_color="#e9edf4" bg_opa="100%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_lane_shadow" bg_color="#5b5f66" bg_opa="70%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_car_body" bg_color="#eceff3" bg_opa="100%" border_width="1" border_color="#a7abb2" radius="14" pad_all="0"/>
-        <style name="st_car_glass" bg_color="#8c929c" bg_opa="100%" border_width="0" radius="8" pad_all="0"/>
-        <style name="st_chip" bg_color="#5c6067" bg_opa="100%" border_width="0" radius="20" pad_all="0"/>
-        <style name="st_ff_scene" bg_color="#07080a" bg_opa="100%" border_width="0" radius="26" pad_all="0"/>
-        <style name="st_ff_sky" bg_color="#0d1118" bg_opa="100%" border_width="0" radius="18" pad_all="0"/>
-        <style name="st_ff_road_far" bg_color="#191d24" bg_opa="100%" border_width="0" radius="4" pad_all="0"/>
-        <style name="st_ff_road_mid" bg_color="#222832" bg_opa="100%" border_width="0" radius="5" pad_all="0"/>
-        <style name="st_ff_road_near" bg_color="#303846" bg_opa="100%" border_width="0" radius="6" pad_all="0"/>
-        <style name="st_ff_lane" bg_color="#edf3fb" bg_opa="92%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_ff_edge_yellow" bg_color="#eab308" bg_opa="100%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_ff_edge_white" bg_color="#f8fafc" bg_opa="100%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_ff_sensor" bg_color="#22d3ee" bg_opa="70%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_ff_lidar" bg_color="#f43f5e" bg_opa="85%" border_width="0" radius="2" pad_all="0"/>
-        <style name="st_ff_detect" bg_opa="0" border_width="1" border_color="#22d3ee" radius="6" pad_all="0"/>
-        <style name="st_ff_ego_body" bg_color="#f1f5f9" bg_opa="100%" border_width="1" border_color="#ffffff" radius="14" pad_all="0"/>
-        <style name="st_ff_ego_roof" bg_color="#cbd5e1" bg_opa="100%" border_width="0" radius="10" pad_all="0"/>
-        <style name="st_ff_glass" bg_color="#64748b" bg_opa="100%" border_width="0" radius="7" pad_all="0"/>
-        <style name="st_ff_target_body" bg_color="#64748b" bg_opa="100%" border_width="1" border_color="#cbd5e1" radius="9" pad_all="0"/>
-        <style name="st_ff_alert_body" bg_color="#b91c1c" bg_opa="100%" border_width="1" border_color="#fecaca" radius="9" pad_all="0"/>
+        <style name="st_black" bg_color="0x020305" bg_opa="100%" border_width="0" radius="0" pad_all="0"/>
+        <style name="st_arc_track_rpm" arc_color="0x3a3108" arc_width="22" arc_rounded="true"/>
+        <style name="st_arc_fill_rpm" arc_color="0xffd21a" arc_width="22" arc_rounded="true"/>
+        <style name="st_arc_track_mph" arc_color="0x12224a" arc_width="22" arc_rounded="true"/>
+        <style name="st_arc_fill_mph" arc_color="0x0a84ff" arc_width="22" arc_rounded="true"/>
+        <style name="st_arc_knob_hidden" bg_opa="0%" border_width="0" pad_all="-20"/>
+        <style name="st_panel" bg_color="0x101113" bg_opa="100%" border_width="0" radius="28" pad_all="0"/>
+        <style name="st_panel_soft" bg_color="0x191a1d" bg_opa="70%" border_width="0" radius="18" pad_all="0"/>
+        <style name="st_text_primary" text_color="0xf5f7fb"/>
+        <style name="st_text_secondary" text_color="0xd8dbe2"/>
+        <style name="st_text_muted" text_color="0x8c919b"/>
+        <style name="st_text_dim" text_color="0x444951"/>
+        <style name="st_speed_text" text_color="0xf5f7fb" text_font="font_96"/>
+        <style name="st_value_text" text_color="0xf5f7fb" text_font="font_24"/>
+        <style name="st_small_text" text_color="0xd8dbe2" text_font="font_16"/>
+        <style name="st_tiny_text" text_color="0x8c919b" text_font="font_12"/>
+        <style name="st_bar_track" bg_color="0x35101d" bg_opa="100%" radius="13" border_width="0" pad_all="0"/>
+        <style name="st_speed_indicator" bg_color="0xff1162" bg_opa="100%" radius="13"/>
+        <style name="st_fuel_track" bg_color="0x09330f" bg_opa="100%" radius="13" border_width="0" pad_all="0"/>
+        <style name="st_fuel_indicator" bg_color="0x12d31f" bg_opa="100%" radius="13"/>
+        <style name="st_rpm_track" bg_color="0x3a3108" bg_opa="100%" radius="6" border_width="0" pad_all="0"/>
+        <style name="st_rpm_indicator" bg_color="0xffd21a" bg_opa="100%" radius="6"/>
+        <style name="st_temp_track" bg_color="0x32102b" bg_opa="100%" radius="6" border_width="0" pad_all="0"/>
+        <style name="st_temp_indicator" bg_color="0xd719b9" bg_opa="100%" radius="6"/>
+        <style name="st_blue_indicator" bg_color="0x0a84ff" bg_opa="100%" radius="5"/>
+        <style name="st_road" bg_color="0x222326" bg_opa="100%" border_width="0" radius="4" pad_all="0"/>
+        <style name="st_road_line" bg_color="0xe9edf4" bg_opa="100%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_lane_shadow" bg_color="0x5b5f66" bg_opa="70%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_car_body" bg_color="0xeceff3" bg_opa="100%" border_width="1" border_color="0xa7abb2" radius="14" pad_all="0"/>
+        <style name="st_car_glass" bg_color="0x8c929c" bg_opa="100%" border_width="0" radius="8" pad_all="0"/>
+        <style name="st_chip" bg_color="0x5c6067" bg_opa="100%" border_width="0" radius="20" pad_all="0"/>
+        <style name="st_ff_scene" bg_color="0x07080a" bg_opa="100%" border_width="0" radius="26" pad_all="0"/>
+        <style name="st_ff_sky" bg_color="0x0d1118" bg_opa="100%" border_width="0" radius="18" pad_all="0"/>
+        <style name="st_ff_road_far" bg_color="0x191d24" bg_opa="100%" border_width="0" radius="4" pad_all="0"/>
+        <style name="st_ff_road_mid" bg_color="0x222832" bg_opa="100%" border_width="0" radius="5" pad_all="0"/>
+        <style name="st_ff_road_near" bg_color="0x303846" bg_opa="100%" border_width="0" radius="6" pad_all="0"/>
+        <style name="st_ff_lane" bg_color="0xedf3fb" bg_opa="92%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_ff_edge_yellow" bg_color="0xeab308" bg_opa="100%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_ff_edge_white" bg_color="0xf8fafc" bg_opa="100%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_ff_sensor" bg_color="0x22d3ee" bg_opa="70%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_ff_lidar" bg_color="0xf43f5e" bg_opa="85%" border_width="0" radius="2" pad_all="0"/>
+        <style name="st_ff_detect" bg_opa="0" border_width="1" border_color="0x22d3ee" radius="6" pad_all="0"/>
+        <style name="st_ff_ego_body" bg_color="0xf1f5f9" bg_opa="100%" border_width="1" border_color="0xffffff" radius="14" pad_all="0"/>
+        <style name="st_ff_ego_roof" bg_color="0xcbd5e1" bg_opa="100%" border_width="0" radius="10" pad_all="0"/>
+        <style name="st_ff_glass" bg_color="0x64748b" bg_opa="100%" border_width="0" radius="7" pad_all="0"/>
+        <style name="st_ff_target_body" bg_color="0x64748b" bg_opa="100%" border_width="1" border_color="0xcbd5e1" radius="9" pad_all="0"/>
+        <style name="st_ff_alert_body" bg_color="0xb91c1c" bg_opa="100%" border_width="1" border_color="0xfecaca" radius="9" pad_all="0"/>
     </styles>
 </globals>

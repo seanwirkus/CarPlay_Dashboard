@@ -34,8 +34,8 @@ constexpr uint32_t PIXEL_INTERVAL_MS = 12;    // faster strip refresh, calmer vi
 constexpr uint32_t ECHO_TIMEOUT_US = 6000;   // ~1 m max range (limit pulseIn() worst-case block to 6 ms)
 constexpr uint32_t US_INTERVAL_MS  = 20;     // faster ultrasonic refresh
 constexpr uint32_t DHT_INTERVAL_MS = 2000;   // DHT22 min read period
-constexpr uint32_t DISPLAY_MS      = 100;
-constexpr uint32_t TX_INTERVAL_MS  = 50;     // 20 Hz unicast — leaves headroom for MAC retries
+constexpr uint32_t DISPLAY_MS      = 50;     // 20 Hz OLED refresh
+constexpr uint32_t TX_INTERVAL_MS  = 33;     // 30 Hz unicast — still leaves headroom for MAC retries
 constexpr uint32_t DIST_STALE_MS   = 1200;
 
 // Sample mode belongs on the C3 so the S3 still proves it is displaying packets
@@ -100,12 +100,22 @@ uint32_t lastDistanceEchoAt = 0;
 // ---------- Tach ----------
 constexpr uint32_t TACH_MIN_PERIOD_US    = 3500;    // reject impossible spikes/noise
 constexpr uint32_t TACH_SIGNAL_TIMEOUT_US = 700000;  // no pulse after this means no live signal
-constexpr uint8_t  TACH_MIN_LOCK_PULSES  = 3;       // ignore one-off random edges
-constexpr uint32_t TACH_SHORT_PERIOD_PCT = 40;      // reject sudden half-period false edges (must be <50 to avoid latch-up)
-constexpr float    TACH_EMA_ALPHA_UP     = 0.30f;
-constexpr float    TACH_EMA_ALPHA_DOWN   = 0.18f;
-constexpr float    TACH_SLEW_UP_RPM_PER_SEC   = 7000.0f;
-constexpr float    TACH_SLEW_DOWN_RPM_PER_SEC = 9000.0f;
+constexpr uint8_t  TACH_MIN_LOCK_PULSES  = 4;       // ignore one-off random edges
+constexpr uint32_t TACH_SHORT_PERIOD_PCT = 60;      // reject pulses faster than 60% of ref (catches false double-edges)
+constexpr uint32_t TACH_LONG_PERIOD_PCT  = 180;     // reject pulses slower than 1.8x ref (catches missed-pulse stretches)
+constexpr int      TACH_RING_SIZE        = 6;       // trimmed-median buffer in ISR (smaller = lower latency)
+constexpr int      TACH_RING_TRIM        = 1;       // trim 1 high + 1 low → median over middle 4
+constexpr float    TACH_EMA_ALPHA_FAST   = 0.22f;   // tight signal → snappy but calm
+constexpr float    TACH_EMA_ALPHA_SLOW   = 0.06f;   // noisy signal → heavy smoothing
+constexpr float    TACH_RPM_EMA_ALPHA_UP   = 0.35f; // 2nd-stage rpm EMA — rising
+constexpr float    TACH_RPM_EMA_ALPHA_DOWN = 0.10f; // 2nd-stage rpm EMA — falling (slower → less decay)
+constexpr uint32_t TACH_SPREAD_TIGHT_PCT = 4;       // ring spread < 4% of median = tight
+constexpr uint32_t TACH_SPREAD_LOOSE_PCT = 18;      // ring spread > 18% of median = loose
+constexpr float    TACH_SLEW_UP_RPM_PER_SEC   = 6000.0f;
+constexpr float    TACH_SLEW_DOWN_RPM_PER_SEC = 2500.0f;   // gentle fall — less decay
+constexpr uint32_t TACH_HOLD_GRACE_US         = 350000;    // hold last rpm this long after a missed pulse
+constexpr float    TACH_LOSS_DECAY_ALPHA      = 0.04f;     // post-grace decay rate when signal lost
+constexpr uint16_t TACH_DISPLAY_QUANTUM       = 10;        // round displayed rpm to nearest N
 constexpr uint32_t TACH_DIAG_MS          = 250;
 constexpr float    TACH_MAX_RPM          = 12000.0f;
 
@@ -113,6 +123,11 @@ volatile uint32_t tachLastPulseUs = 0;
 volatile uint32_t tachPeriodUs    = 0;
 volatile uint32_t tachPulseCount  = 0;
 volatile uint32_t tachRejectCount = 0;
+volatile uint32_t tachPeriodRing[TACH_RING_SIZE] = {0};
+volatile uint8_t  tachRingHead   = 0;
+volatile uint32_t tachRefPeriodUs = 0;   // stable reference for ISR reject; updated by main loop
+uint32_t tachMedianPeriodUs = 0;
+float    tachFilteredPeriodUs = 0.0f;    // smoothing happens in the period domain for constant resolution
 uint16_t tachRawRpm = 0;
 float tachFilteredRpm = 0.0f;
 uint16_t currentRpm = 0;
@@ -134,12 +149,28 @@ void IRAM_ATTR tachIsr() {
         tachRejectCount++;
         return;
     }
-    if (tachPeriodUs != 0 && dt < ((tachPeriodUs * TACH_SHORT_PERIOD_PCT) / 100UL)) {
-        tachRejectCount++;
-        return;
+    const uint32_t ref = tachRefPeriodUs;
+    if (ref != 0) {
+        const uint32_t lo = (ref * TACH_SHORT_PERIOD_PCT) / 100UL;
+        const uint32_t hi = (ref * TACH_LONG_PERIOD_PCT) / 100UL;
+        if (dt < lo) {
+            // Likely spurious double-edge — leave timestamp untouched so the *next*
+            // real pulse is measured against the previous good edge.
+            tachRejectCount++;
+            return;
+        }
+        if (dt > hi) {
+            // Missed pulse(s) stretched the period — advance timestamp so we don't
+            // keep counting the stretch, but don't pollute the median ring.
+            tachLastPulseUs = now;
+            tachRejectCount++;
+            return;
+        }
     }
     tachPeriodUs    = dt;
     tachLastPulseUs = now;
+    tachPeriodRing[tachRingHead] = dt;
+    tachRingHead = (tachRingHead + 1) % TACH_RING_SIZE;
     tachPulseCount++;
 }
 
@@ -150,45 +181,109 @@ static void updateTachRpm(uint32_t nowMs) {
     uint32_t periodUs;
     uint32_t lastUs;
     uint32_t pulseCount;
+    uint32_t ring[TACH_RING_SIZE];
     noInterrupts();
     periodUs = tachPeriodUs;
     lastUs   = tachLastPulseUs;
     pulseCount = tachPulseCount;
+    for (int i = 0; i < TACH_RING_SIZE; i++) ring[i] = tachPeriodRing[i];
     interrupts();
 
+    // Trimmed median over recent valid periods. Insertion sort (small N).
+    int n = 0;
+    for (int i = 0; i < TACH_RING_SIZE; i++) if (ring[i] != 0) ring[n++] = ring[i];
+    for (int i = 1; i < n; i++) {
+        const uint32_t key = ring[i];
+        int j = i - 1;
+        while (j >= 0 && ring[j] > key) { ring[j + 1] = ring[j]; j--; }
+        ring[j + 1] = key;
+    }
+    uint32_t medianUs = 0;
+    uint32_t spreadUs = 0;
+    if (n >= (TACH_RING_TRIM * 2 + 2)) {
+        const int lo = TACH_RING_TRIM;
+        const int hi = n - TACH_RING_TRIM;
+        uint64_t sum = 0;
+        int cnt = 0;
+        for (int i = lo; i < hi; i++) { sum += ring[i]; cnt++; }
+        if (cnt > 0) medianUs = static_cast<uint32_t>(sum / cnt);
+        spreadUs = ring[hi - 1] - ring[lo];   // spread of the kept window
+    } else if (n > 0) {
+        medianUs = ring[n / 2];
+        spreadUs = n > 1 ? (ring[n - 1] - ring[0]) : 0;
+    }
+    if (medianUs == 0) medianUs = periodUs;
+    tachMedianPeriodUs = medianUs;
+    tachRefPeriodUs = medianUs;   // feed ISR reject thresholds
+
     const uint32_t ageUs = lastUs == 0 ? 0xFFFFFFFFUL : (micros() - lastUs);
-    const bool liveSignal = periodUs != 0 &&
+    const bool liveSignal = medianUs != 0 &&
                             pulseCount >= TACH_MIN_LOCK_PULSES &&
                             ageUs <= TACH_SIGNAL_TIMEOUT_US;
 
     tachLocked = liveSignal;
 
     if (liveSignal) {
-        const float freqHz = 1000000.0f / static_cast<float>(periodUs);
-        float targetRpm = (freqHz * 60.0f) / TACH_PULSES_PER_REV;
-        if (targetRpm < 0.0f) targetRpm = 0.0f;
-        if (targetRpm > TACH_MAX_RPM) targetRpm = TACH_MAX_RPM;
-
-        tachRawRpm = static_cast<uint16_t>(targetRpm + 0.5f);
-        if (tachFilteredRpm < 50.0f) {
-            tachFilteredRpm = targetRpm;
+        // Adaptive alpha: tight ring = trust the new sample, noisy ring = stay calm.
+        const uint32_t spreadPct = medianUs > 0 ? (spreadUs * 100UL) / medianUs : 0;
+        float alpha;
+        if (spreadPct <= TACH_SPREAD_TIGHT_PCT) {
+            alpha = TACH_EMA_ALPHA_FAST;
+        } else if (spreadPct >= TACH_SPREAD_LOOSE_PCT) {
+            alpha = TACH_EMA_ALPHA_SLOW;
         } else {
-            const float alpha = targetRpm >= tachFilteredRpm ? TACH_EMA_ALPHA_UP : TACH_EMA_ALPHA_DOWN;
-            const float blendedRpm = tachFilteredRpm + alpha * (targetRpm - tachFilteredRpm);
-            const float slewPerSec = targetRpm >= tachFilteredRpm ? TACH_SLEW_UP_RPM_PER_SEC : TACH_SLEW_DOWN_RPM_PER_SEC;
+            const float t = static_cast<float>(spreadPct - TACH_SPREAD_TIGHT_PCT) /
+                            static_cast<float>(TACH_SPREAD_LOOSE_PCT - TACH_SPREAD_TIGHT_PCT);
+            alpha = TACH_EMA_ALPHA_FAST + t * (TACH_EMA_ALPHA_SLOW - TACH_EMA_ALPHA_FAST);
+        }
+
+        // Filter in the period domain (linear w.r.t. RPM resolution).
+        if (tachFilteredPeriodUs < 100.0f) {
+            tachFilteredPeriodUs = static_cast<float>(medianUs);
+        } else {
+            tachFilteredPeriodUs += alpha * (static_cast<float>(medianUs) - tachFilteredPeriodUs);
+        }
+
+        const float freqHz = 1000000.0f / tachFilteredPeriodUs;
+        float periodRpm = (freqHz * 60.0f) / TACH_PULSES_PER_REV;
+        if (periodRpm < 0.0f) periodRpm = 0.0f;
+        if (periodRpm > TACH_MAX_RPM) periodRpm = TACH_MAX_RPM;
+
+        // Raw (unsmoothed) rpm from the median for diagnostics.
+        const float rawFreq = 1000000.0f / static_cast<float>(medianUs);
+        tachRawRpm = static_cast<uint16_t>(((rawFreq * 60.0f) / TACH_PULSES_PER_REV) + 0.5f);
+
+        // 2nd-stage rpm EMA + slew limit. Asymmetric: slower on the way down so
+        // brief signal gaps and pulse jitter don't make the needle dip.
+        if (tachFilteredRpm < 50.0f) {
+            tachFilteredRpm = periodRpm;
+        } else {
+            const bool rising = periodRpm >= tachFilteredRpm;
+            const float rpmAlpha = rising ? TACH_RPM_EMA_ALPHA_UP : TACH_RPM_EMA_ALPHA_DOWN;
+            const float blendedRpm = tachFilteredRpm + rpmAlpha * (periodRpm - tachFilteredRpm);
+            const float slewPerSec = rising ? TACH_SLEW_UP_RPM_PER_SEC : TACH_SLEW_DOWN_RPM_PER_SEC;
             tachFilteredRpm = slewLimit(tachFilteredRpm, blendedRpm, slewPerSec * (static_cast<float>(dtMs) / 1000.0f));
         }
     } else {
         tachRawRpm = 0;
         if (lastUs == 0 || ageUs > TACH_SIGNAL_TIMEOUT_US) {
             tachFilteredRpm = 0.0f;
+            tachFilteredPeriodUs = 0.0f;
+            tachRefPeriodUs = 0;
+        } else if (ageUs < TACH_HOLD_GRACE_US) {
+            // Hold last reading — short pulse gap, probably just jitter not a real drop.
         } else {
-            const float blendedRpm = tachFilteredRpm + TACH_EMA_ALPHA_DOWN * (0.0f - tachFilteredRpm);
+            // Past grace window — slow decay toward zero, not snap.
+            const float blendedRpm = tachFilteredRpm + TACH_LOSS_DECAY_ALPHA * (0.0f - tachFilteredRpm);
             tachFilteredRpm = slewLimit(tachFilteredRpm, blendedRpm, TACH_SLEW_DOWN_RPM_PER_SEC * (static_cast<float>(dtMs) / 1000.0f));
         }
     }
 
-    currentRpm = static_cast<uint16_t>(tachFilteredRpm + 0.5f);
+    uint16_t rpmRounded = static_cast<uint16_t>(tachFilteredRpm + 0.5f);
+    if (TACH_DISPLAY_QUANTUM > 1) {
+        rpmRounded = ((rpmRounded + TACH_DISPLAY_QUANTUM / 2) / TACH_DISPLAY_QUANTUM) * TACH_DISPLAY_QUANTUM;
+    }
+    currentRpm = rpmRounded;
     if (currentRpm < 20 && !liveSignal) currentRpm = 0;
 }
 
@@ -535,21 +630,24 @@ void drawDisplay() {
 
     const int x = OLED_X_OFFSET;
     const int y = OLED_Y_OFFSET;
-    char line[24];
+    char line[12];
 
-    // This C3 OLED is a 72x40 visible window inside a 128x64 buffer.
-    // Keep all live text inside that window so it is not clipped.
+    // 72x40 visible window. Full-screen RPM: small "RPM" + lock dot header,
+    // then a big numeric readout filling the rest of the window.
     u8g2.setFont(u8g2_font_6x10_tf);
-    snprintf(line, sizeof(line), "RPM %u", currentRpm);
-    u8g2.drawStr(x, y + 9, line);
+    u8g2.drawStr(x, y + 8, "RPM");
+    if (tachLocked) {
+        u8g2.drawDisc(x + OLED_WIDTH - 4, y + 4, 2);
+    } else {
+        u8g2.drawCircle(x + OLED_WIDTH - 4, y + 4, 2);
+    }
 
-    snprintf(line, sizeof(line), "MPH %u", currentMph);
-    u8g2.drawStr(x, y + 22, line);
-
-    snprintf(line, sizeof(line), "FUEL %u%%", currentFuelPct);
-    u8g2.drawStr(x, y + 32, line);
-
-    u8g2.drawStr(x, y + 40, "TX W+U");
+    snprintf(line, sizeof(line), "%u", currentRpm);
+    u8g2.setFont(u8g2_font_logisoso24_tn);
+    const int w = u8g2.getStrWidth(line);
+    int nx = x + (OLED_WIDTH - w) / 2;
+    if (nx < x) nx = x;
+    u8g2.drawStr(nx, y + 36, line);
 
     u8g2.sendBuffer();
 }
@@ -716,12 +814,13 @@ void loop() {
         rejectCount = tachRejectCount;
         interrupts();
         const uint32_t ageMs = lastUs == 0 ? 0xFFFFFFFFUL : ((micros() - lastUs) / 1000UL);
-        Serial.printf("tach pin=GPIO%u level=%u raw=%u rpm=%u period=%luus age=%lums pulses=%lu reject=%lu | fuel %s adc=%u pct=%u ohm=",
+        Serial.printf("tach pin=GPIO%u level=%u raw=%u rpm=%u period=%luus med=%luus age=%lums pulses=%lu reject=%lu | fuel %s adc=%u pct=%u ohm=",
                       TACH_PIN,
                       digitalRead(TACH_PIN),
                       tachRawRpm,
                       currentRpm,
                       static_cast<unsigned long>(periodUs),
+                      static_cast<unsigned long>(tachMedianPeriodUs),
                       static_cast<unsigned long>(ageMs),
                       static_cast<unsigned long>(pulseCount),
                       static_cast<unsigned long>(rejectCount),

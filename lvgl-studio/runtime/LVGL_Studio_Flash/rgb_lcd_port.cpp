@@ -12,17 +12,33 @@
  ******************************************************************************/
 
 #include "rgb_lcd_port.h"
-#include "lvgl_port.h"
 
-const char *TAG = "example";
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+const char *TAG = "rgb_lcd_port";
 
 // Handle for the RGB LCD panel
 static esp_lcd_panel_handle_t panel_handle = NULL; // Declare a handle for the LCD panel
+static TaskHandle_t s_vsync_task = NULL;
 
-// VSYNC event callback function
-IRAM_ATTR static bool rgb_lcd_on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *edata, void *user_ctx)
+IRAM_ATTR static bool rgb_lcd_on_vsync_event(esp_lcd_panel_handle_t panel,
+                                             const esp_lcd_rgb_panel_event_data_t *edata,
+                                             void *user_ctx)
 {
-    return lvgl_port_notify_rgb_vsync();
+    (void)panel;
+    (void)edata;
+    (void)user_ctx;
+    BaseType_t need_yield = pdFALSE;
+    if (s_vsync_task != NULL) {
+        xTaskNotifyFromISR(s_vsync_task, ULONG_MAX, eNoAction, &need_yield);
+    }
+    return (need_yield == pdTRUE);
+}
+
+void rgb_lcd_bind_vsync_task(TaskHandle_t task)
+{
+    s_vsync_task = task;
 }
 
 /**
@@ -48,12 +64,14 @@ esp_lcd_panel_handle_t waveshare_esp32_s3_rgb_lcd_init()
             .pclk_hz = EXAMPLE_LCD_PIXEL_CLOCK_HZ, // Pixel clock frequency in Hz
             .h_res = EXAMPLE_LCD_H_RES,            // Horizontal resolution (number of pixels per row)
             .v_res = EXAMPLE_LCD_V_RES,            // Vertical resolution (number of rows)
-            .hsync_pulse_width = 162,                // Horizontal sync pulse width
-            .hsync_back_porch = 152,                 // Horizontal back porch
-            .hsync_front_porch = 48,                // Horizontal front porch
-            .vsync_pulse_width = 45,                // Vertical sync pulse width
-            .vsync_back_porch = 13,                 // Vertical back porch
-            .vsync_front_porch = 3,                // Vertical front porch
+            // Recovery-safe timing profile that has rendered reliably on this panel.
+            // Waveshare 7B vendor default (original working config).
+            .hsync_pulse_width = 162,
+            .hsync_back_porch = 152,
+            .hsync_front_porch = 48,
+            .vsync_pulse_width = 45,
+            .vsync_back_porch = 13,
+            .vsync_front_porch = 3,
             .flags = {
                 .pclk_active_neg = 1, // Set pixel clock polarity to active low
             },
@@ -104,12 +122,24 @@ esp_lcd_panel_handle_t waveshare_esp32_s3_rgb_lcd_init()
 
     esp_lcd_rgb_panel_event_callbacks_t cbs = {
 #if EXAMPLE_RGB_BOUNCE_BUFFER_SIZE > 0
-        .on_bounce_frame_finish = rgb_lcd_on_vsync_event, // Callback for bounce frame finish
+        .on_bounce_frame_finish = rgb_lcd_on_vsync_event,
 #else
-        .on_vsync = rgb_lcd_on_vsync_event, // Callback for vertical sync
+        .on_vsync = rgb_lcd_on_vsync_event,
 #endif
     };
-    ESP_ERROR_CHECK(esp_lcd_rgb_panel_register_event_callbacks(panel_handle, &cbs, NULL)); // Register event callbacks
+    ESP_ERROR_CHECK(esp_lcd_rgb_panel_register_event_callbacks(panel_handle, &cbs, NULL));
+
+    // Give the LCD more time to initialize
+    vTaskDelay(pdMS_TO_TICKS(500));
+    
+    // Try to reset the panel if available
+    esp_err_t reset_result = esp_lcd_panel_reset(panel_handle);
+    if (reset_result == ESP_OK) {
+        ESP_LOGI(TAG, "LCD panel reset successful");
+        vTaskDelay(pdMS_TO_TICKS(200));
+    } else {
+        ESP_LOGW(TAG, "LCD panel reset not available or failed");
+    }
 
     // Return success status
     return panel_handle;
@@ -179,8 +209,16 @@ void wavesahre_rgb_lcd_display_window(int16_t Xstart, int16_t Ystart, int16_t Xe
  */
 void wavesahre_rgb_lcd_display(uint8_t *Image)
 {
+    if (panel_handle == NULL) {
+        printf("Error: LCD panel not initialized!\n");
+        return;
+    }
+    
     // Draw the entire image on the screen
-    esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, EXAMPLE_LCD_H_RES, EXAMPLE_LCD_V_RES, Image);
+    esp_err_t ret = esp_lcd_panel_draw_bitmap(panel_handle, 0, 0, EXAMPLE_LCD_H_RES, EXAMPLE_LCD_V_RES, Image);
+    if (ret != ESP_OK) {
+        printf("Error: Failed to draw bitmap to LCD! Error code: %d\n", ret);
+    }
 }
 
 void waveshare_get_frame_buffer(void **buf1, void **buf2)
@@ -214,5 +252,8 @@ void wavesahre_rgb_lcd_bl_on()
  */
 void wavesahre_rgb_lcd_bl_off()
 {
-    IO_EXTENSION_Output(IO_EXTENSION_IO_2, 0);  // Backlight OFF configuration
+    IO_EXTENSION_Output(IO_EXTENSION_IO_2,0);  // Backlight OFF configuration
+}
+void waveshare_rgb_lcd_draw_bitmap(int x1, int y1, int x2, int y2, void *color_data) {
+    esp_lcd_panel_draw_bitmap(panel_handle, x1, y1, x2, y2, color_data);
 }

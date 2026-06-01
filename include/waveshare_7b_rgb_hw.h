@@ -11,7 +11,9 @@
 #define WS7B_RGB_BIT_PER_PIXEL      16
 #define WS7B_RGB_DATA_WIDTH         16
 #define WS7B_LCD_RGB_BUFFER_NUMS    2
-#define WS7B_RGB_BOUNCE_BUFFER_SIZE (WS7B_LCD_H_RES * 10)
+// Bigger bounce buffer = fewer PSRAM stalls during HBLANK = much less subtle flicker.
+// 20 lines × 1024 px × 2 B × 2 buffers = 80 KB internal SRAM. Safe on ESP32-S3 (512 KB).
+#define WS7B_RGB_BOUNCE_BUFFER_SIZE (WS7B_LCD_H_RES * 20)
 
 #define WS7B_LCD_IO_RGB_DISP        (-1)
 #define WS7B_LCD_IO_RGB_VSYNC       (GPIO_NUM_3)

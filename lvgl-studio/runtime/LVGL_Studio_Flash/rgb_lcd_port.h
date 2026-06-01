@@ -34,7 +34,10 @@
  */
 #define EXAMPLE_LCD_H_RES               (1024)  ///< Horizontal resolution in pixels
 #define EXAMPLE_LCD_V_RES               (600)  ///< Vertical resolution in pixels
-#define EXAMPLE_LCD_PIXEL_CLOCK_HZ      (20 * 1000 * 1000) ///< Conservative clock; 30 MHz can blank some panels
+
+// Full-bleed LVGL layouts use coordinates 0..(H_RES-1). If the on-glass image is
+// H/V: tune hsync/vsync porches in rgb_lcd_port.cpp (keep lv_display_set_offset at 0,0).
+#define EXAMPLE_LCD_PIXEL_CLOCK_HZ      (30 * 1000 * 1000) ///< 30 MHz — Waveshare 7B default
 
 /**
  * @brief Color and Pixel Configuration
@@ -43,7 +46,7 @@
 #define EXAMPLE_RGB_BIT_PER_PIXEL       (16)   ///< RGB interface color depth
 #define EXAMPLE_RGB_DATA_WIDTH          (16)   ///< Data width for RGB interface
 #define EXAMPLE_LCD_RGB_BUFFER_NUMS     (2)    ///< Number of frame buffers for double buffering
-#define EXAMPLE_RGB_BOUNCE_BUFFER_SIZE  (EXAMPLE_LCD_H_RES * 10) ///< Bounce buffer for stable VSYNC callback
+#define EXAMPLE_RGB_BOUNCE_BUFFER_SIZE  (EXAMPLE_LCD_H_RES * 20) ///< Conservative SRAM usage for stable scanout
 
 /**
  * @brief GPIO Pins for RGB LCD Signals
@@ -51,7 +54,7 @@
 #define EXAMPLE_LCD_IO_RGB_DISP         (-1)   ///< DISP signal, -1 if not used
 #define EXAMPLE_LCD_IO_RGB_VSYNC        (GPIO_NUM_3)  ///< Vertical sync signal
 #define EXAMPLE_LCD_IO_RGB_HSYNC        (GPIO_NUM_46) ///< Horizontal sync signal
-#define EXAMPLE_LCD_IO_RGB_DE           (GPIO_NUM_5)  ///< Data enable signal; do not attach external modules
+#define EXAMPLE_LCD_IO_RGB_DE           (GPIO_NUM_5)  ///< Data enable signal
 #define EXAMPLE_LCD_IO_RGB_PCLK         (GPIO_NUM_7)  ///< Pixel clock signal
 
 /**
@@ -125,5 +128,8 @@ void wavesahre_rgb_lcd_display(uint8_t *Image);
  * @param buf2 Pointer to hold the address of the second frame buffer.
  */
 void waveshare_get_frame_buffer(void **buf1, void **buf2);
+
+/** Task notified on bounce-frame / vsync (used by LVGL flush). */
+void rgb_lcd_bind_vsync_task(TaskHandle_t task);
 
 #endif // _RGB_LCD_H_

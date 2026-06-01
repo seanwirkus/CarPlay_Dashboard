@@ -1,0 +1,19 @@
+set(LV_EDITOR_PROJECT_SOURCES)
+list(
+  APPEND
+  LV_EDITOR_PROJECT_SOURCES
+  ${CMAKE_CURRENT_LIST_DIR}/components/freeway_3d_view_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/bs_icons_24_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/bs_icons_48_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_12_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_16_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_18_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_20_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_24_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_32_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_48_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_64_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/fonts/font_96_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/lvgl_editor_gen.c
+  ${CMAKE_CURRENT_LIST_DIR}/lvgl_editor.c
+  ${CMAKE_CURRENT_LIST_DIR}/screens/lvgl_studio_flash_gen.c)

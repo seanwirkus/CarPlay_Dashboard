@@ -1,135 +1,65 @@
-# ESP32 Bridge — C3 Sensor Hub + S3 Dashboard Display
+# CarPlay Dashboard (ESP-NOW bridge)
 
-A dual-board vehicle telemetry system built on ESP32-C3 and ESP32-S3.
+Firmware for **ESP32-C3** sensor hub and **ESP32-S3** Waveshare 7″ display.
 
-## Architecture
-
-```
-┌──────────────────────┐  SensorPacket  ┌──────────────────────────────┐
-│  ESP32-C3 Sensor Hub │  ────────────▶   │  ESP32-S3 Display / Bridge   │
-│                      │   ESP-NOW ch 1   │                              │
-│  • HC-SR04 distance  │                  │  • Receives telemetry (SSE)  │
-│  • DHT11 temp/humid  │  ◀────────────   │  • Serves React on SPIFFS    │
-│  • WS2812 front/rear │  ControlPacket   │  • Forwards light taps→C3   │
-│  • SSD1306 OLED      │  (light flags)   │  • Waveshare 1024×600 UI     │
-│  • Wi-Fi AP + Web UI │                  │                              │
-└──────────────────────┘                  └──────────────────────────────┘
-```
-
-## Quick Start
-
-### 1. Flash the ESP32-C3 Sensor Hub
+## Flash
 
 ```bash
+# C3 sensor hub (ultrasonic, DHT, OLED, NeoPixels, ESP-NOW TX)
 pio run -e c3-sensor -t upload
+
+# S3 native LVGL dashboard (lvgl_editor UI + ESP-NOW)
+pio run -e s3-lvgl-studio -t upload
+
+# S3 Wi-Fi dashboard (React UI on SPIFFS + ESP-NOW)
+pio run -e s3-dashboard -t upload
+pio run -e s3-dashboard -t uploadfs
 ```
 
-Connect to Wi-Fi `ESP32C3-Sensors` (password: `neopixel!`) and open `http://192.168.4.1/` to toggle exterior lights (on the C3 strips) and view raw sensor data.
+## Layout
 
-### 2. Build the React Dashboard
+| Path | Purpose |
+|------|---------|
+| `firmware/c3-sensor/` | C3 firmware |
+| `firmware/s3-dashboard/` | S3 web/AP dashboard |
+| `firmware/lvgl_studio_flash/` | S3 LVGL runtime (`LVGL_Studio_Flash.ino`) |
+| `lvgl_editor/` | LVGL Editor Pro UI export |
+| `lv_port_pc_vscode/` | LVGL 9 library |
+| `include/` | Shared packets (`sensor_packet.h`, etc.) |
+| `data/` | SPIFFS assets for `s3-dashboard` |
+| `15_LVGL_SLIDER/boards/` | Waveshare board definition |
+| `15_LVGL_SLIDER/lib/i2c`, `io_extension/` | Panel I2C / IO expander |
+
+## Main sketch
+
+Edit **`lvgl-studio/runtime/LVGL_Studio_Flash/LVGL_Studio_Flash.ino`** (symlinked as `firmware/lvgl_studio_flash/main.cpp`).
+
+## Build all targets
 
 ```bash
-cd dashboard
-npm install
-npm run build    # outputs to ../data/ for SPIFFS
+pio run -e c3-sensor -e s3-lvgl-studio -e s3-dashboard
 ```
 
-### 3. Flash the ESP32-S3 Dashboard
+(`s3-lvgl-studio` uses `lv_port_pc_vscode/lv_conf.h` with ESP-specific settings: no SDL/ThorVG/sysmon, 96KB LV heap.)
+
+## Mac / PC simulator (layout preview)
+
+Preview the **1024×600** LVGL Editor dashboard on your Mac without flashing hardware. This checks XML layout, fonts, and centering. **RGB porch timing** (Waveshare panel shift) is still tuned only in `firmware/lvgl_studio_flash/rgb_lcd_port.cpp` on the S3.
+
+**Prerequisites (macOS):**
 
 ```bash
-pio run -e s3-dashboard -t uploadfs   # upload React app to SPIFFS
-pio run -e s3-dashboard -t upload      # flash firmware
+brew install sdl2 cmake
 ```
 
-If upload fails, put the board in **download mode**: hold **BOOT**, tap **RESET**, release **BOOT**, then run `upload` again.
-
-The Waveshare **7B** panel is driven natively (backlight + RGB). After boot you should see a splash with the AP IP (`192.168.4.1`), Wi‑Fi name, and password — then open that URL in a browser on a phone/tablet (or on the same device if it has a browser). **Do not use GPIO2 as a blinking “status LED” on this board** — it is an LCD data line and will blank or corrupt the image.
-
-Connect to the S3 AP (`ESP32S3-Dashboard`, password: `dashboard1`) and open `http://192.168.4.1/`.
-
-### 4. Development Mode (no hardware)
+**Run:**
 
 ```bash
-cd dashboard
-npm run dev
+./scripts/run_dashboard_sim.sh
 ```
 
-Open `http://localhost:5173` — use keyboard controls to test the dashboard:
-- `↑`/`↓` — Speed
-- `←`/`→` — RPM
-- `G` — Cycle gear
-- `E` — Toggle ECO
-- `F`/`Shift+F` — Fuel up/down
-- `T`/`Shift+T` — Temp up/down
-- `D`/`Shift+D` — Ultrasonic distance up/down
+- SDL window at **1024×600** with demo gauge values
+- Press **G** to toggle red center cross / border guides
+- After editing `lvgl_editor/`, regenerate in LVGL Editor, then re-run the script
 
-## Project Structure
-
-```
-ESP32-C3/
-├── platformio.ini              # Multi-env: c3-sensor + s3-dashboard
-├── firmware/
-│   ├── c3-sensor/main.cpp      # C3 firmware (sensors + ESP-NOW TX)
-│   └── s3-dashboard/main.cpp   # S3 firmware (ESP-NOW RX + web + light relay)
-├── dashboard/                  # React/Vite app for Waveshare display
-│   ├── src/App.tsx             # Main dashboard layout
-│   └── src/components/         # UI components
-├── include/
-│   ├── c3_pins.h               # Active C3 sensor-hub pin definitions
-│   ├── board_pins.h            # Legacy compatibility shim for archives
-│   ├── s3_pins.h               # S3 pin definitions
-│   ├── sensor_packet.h         # Shared telemetry ESP-NOW struct
-│   └── control_packet.h        # S3→C3 light command (ESP-NOW)
-├── data/                       # Built dashboard (SPIFFS upload target)
-├── src/_archived/              # Older projector experiments kept as reference
-└── lib/                        # PlatformIO libraries
-```
-
-## ESP-NOW Protocol
-
-The C3 broadcasts a `SensorPacket` at 10 Hz on ESP-NOW channel 1:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `magic` | `uint32_t` | `0x45535052` ('ESPR') |
-| `version` | `uint8_t` | Protocol version (1) |
-| `lights` | `uint8_t` | Bit flags for exterior lights |
-| `seq` | `uint32_t` | Packet sequence number |
-| `distanceCm` | `float` | Smoothed ultrasonic distance |
-| `tempC` | `float` | Temperature in Celsius |
-| `humidity` | `float` | Relative humidity % |
-
-The S3 can broadcast a `ControlPacket` (`magic` `0x4354524C`, `lights` field) so the CarPlay web UI can update light flags on the C3 without joining the C3’s Wi‑Fi AP.
-
-### Light Bit Flags
-
-| Bit | Flag | Description |
-|-----|------|-------------|
-| 0 | `LIGHT_HEAD` | Headlights |
-| 1 | `LIGHT_LEFT` | Left turn signal |
-| 2 | `LIGHT_RIGHT` | Right turn signal |
-| 3 | `LIGHT_BRAKE` | Brake lights |
-| 4 | `LIGHT_HAZARD` | Hazard flashers |
-
-## Wiring
-
-### ESP32-C3
-
-See [`include/c3_pins.h`](include/c3_pins.h) for the active sensor-hub pin assignments.
-
-- **OLED**: SDA=GPIO5, SCL=GPIO6
-- **Ultrasonic**: TRIG=GPIO1, ECHO=GPIO0 (through voltage divider!)
-- **DHT11**: DATA=GPIO3
-- **Front WS2812** (head / turns): DATA=GPIO9 (18 LEDs)
-- **Rear WS2812** (tail / brake / turns): DATA=GPIO10 (18 LEDs)
-- **LED**: GPIO8 (active LOW)
-
-### ESP32-S3
-
-See [`include/s3_pins.h`](include/s3_pins.h). This build uses the board mainly for the LCD-hosted dashboard and Wi‑Fi; **vehicle WS2812 strips are not wired here**.
-
-- **Status LED**: GPIO2 (heartbeat / link)
-
-## Laser Safety
-
-If using the DMX laser projector features (archived firmware), treat a 500 mW projector as an eye hazard. See the archived code for DMX wiring details.
+**LVGL Editor** (installed app) also has a built-in preview; use that for live XML edits. The SDL sim matches what the S3 firmware draws (same `lvgl_editor` C export).
