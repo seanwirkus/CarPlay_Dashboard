@@ -43,7 +43,15 @@ constexpr uint32_t DIST_STALE_MS   = 1200;
 #define C3_SAMPLE_MODE 0
 
 uint8_t lightFlags = 0;
+#if VEHICLE_LIGHTS_ENABLED
+bool demoSequenceEnabled = false;
+#else
 bool demoSequenceEnabled = true;
+#endif
+#if VEHICLE_LIGHTS_ENABLED
+uint32_t lastEspNowLightMs = 0;   // hold ESP-NOW light cmds briefly over GPIO reads
+constexpr uint32_t ESPNOW_LIGHT_HOLD_MS = 2000;
+#endif
 
 // Unicast to S3 (10:51:db:74:f4:b8) — MAC-layer ACK + auto-retry, dramatic reliability boost vs broadcast.
 static uint8_t S3_PEER_MAC[6] = {0x10, 0x51, 0xDB, 0x74, 0xF4, 0xB8};
@@ -64,6 +72,9 @@ void onEspNowRecvC3(const esp_now_recv_info_t *info, const uint8_t *data, int le
     if (pkt->magic != CONTROL_MAGIC || pkt->version != CONTROL_VERSION) return;
     demoSequenceEnabled = false;
     lightFlags = pkt->lights;
+#if VEHICLE_LIGHTS_ENABLED
+    lastEspNowLightMs = millis();
+#endif
 }
 
 void onEspNowSentC3(const esp_now_send_info_t *info, esp_now_send_status_t status) {
@@ -435,6 +446,21 @@ static void applySweepingTurn(Adafruit_NeoPixel& strip, bool leftSide, uint32_t 
     }
 }
 
+#if VEHICLE_LIGHTS_ENABLED
+static void updateVehicleLights(uint32_t now) {
+    if (demoSequenceEnabled) return;
+    if (lastEspNowLightMs != 0 && (now - lastEspNowLightMs) < ESPNOW_LIGHT_HOLD_MS) return;
+
+    uint8_t flags = 0;
+    if (!digitalRead(LIGHT_HEAD_PIN))  flags |= LIGHT_HEAD;
+    if (!digitalRead(LIGHT_LEFT_PIN))  flags |= LIGHT_LEFT;
+    if (!digitalRead(LIGHT_RIGHT_PIN)) flags |= LIGHT_RIGHT;
+    if (!digitalRead(LIGHT_BRAKE_PIN)) flags |= LIGHT_BRAKE;
+    if ((flags & LIGHT_LEFT) && (flags & LIGHT_RIGHT)) flags |= LIGHT_HAZARD;
+    lightFlags = flags;
+}
+#endif
+
 static void updateDemoSequence(uint32_t now) {
     if (!demoSequenceEnabled) return;
 
@@ -593,6 +619,22 @@ void sendSensorPacket() {
     if (!isnan(tempC) || !isnan(humidity)) pkt.statusFlags |= SENSOR_DHT_VALID;
     pkt.seq           = ++txSeq;
     pkt.millisSent    = millis();
+
+    // USB JSON for Raspberry Pi cluster bridge (see RetroVision/RasberryPi/firmware_patch.md).
+    {
+        const float dOut = isnan(distanceCm) ? -1.0f   : distanceCm;
+        const float tOut = isnan(tempC)      ? -1000.0f : tempC;
+        const float hOut = isnan(humidity)   ? -1.0f    : humidity;
+        Serial.printf(
+            "{\"rpm\":%u,\"mph\":%u,\"fuel\":%u,\"t\":%.1f,\"h\":%.1f,\"d\":%.1f,"
+            "\"lt\":%u,\"st\":%u,\"sq\":%lu,\"ms\":%lu}\n",
+            currentRpm, currentMph, currentFuelPct,
+            tOut, hOut, dOut,
+            pkt.lights, pkt.statusFlags,
+            static_cast<unsigned long>(txSeq),
+            static_cast<unsigned long>(millis()));
+    }
+
     pkt.distanceCm    = distanceCm;
     pkt.distanceCmRaw = distanceCmRaw;
     pkt.tempC         = tempC;
@@ -658,8 +700,10 @@ void setup() {
     Serial.begin(115200);
     delay(200);
 
+#if !VEHICLE_LIGHTS_ENABLED
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, HIGH);  // active-LOW: off at boot
+#endif
 
     // UART bridge to S3
     Serial1.begin(UART_BRIDGE_BAUD, SERIAL_8N1, UART_BRIDGE_RX_PIN, UART_BRIDGE_TX_PIN);
@@ -680,6 +724,13 @@ void setup() {
     pinMode(FUEL_PIN, INPUT);
     analogReadResolution(12);
 
+#if VEHICLE_LIGHTS_ENABLED
+    pinMode(LIGHT_LEFT_PIN, INPUT_PULLUP);
+    pinMode(LIGHT_RIGHT_PIN, INPUT_PULLUP);
+    pinMode(LIGHT_BRAKE_PIN, INPUT_PULLUP);
+    pinMode(LIGHT_HEAD_PIN, INPUT_PULLUP);
+#endif
+
     Wire.begin(OLED_SDA, OLED_SCL);
     u8g2.setI2CAddress(OLED_ADDR * 2);
     u8g2.begin();
@@ -689,7 +740,9 @@ void setup() {
     u8g2.sendBuffer();
 
     Serial.println("C3 Sensor Hub Initialized.");
+#if !VEHICLE_LIGHTS_ENABLED
     dht.begin();
+#endif
 
     frontStrip.begin();
     frontStrip.clear();
@@ -733,12 +786,21 @@ void setup() {
     if (!FUEL_SENDER_ENABLED) {
         Serial.println("FUEL sender disabled in firmware until the divider is wired.");
     }
+#if VEHICLE_LIGHTS_ENABLED
+    Serial.printf("VEHICLE lights GPIO: head=%u left=%u right=%u brake=%u (hazard=derived)\n",
+                  LIGHT_HEAD_PIN, LIGHT_LEFT_PIN, LIGHT_RIGHT_PIN, LIGHT_BRAKE_PIN);
+#else
+    Serial.printf("VEHICLE lights: demo/ESP-NOW only (build with -DVEHICLE_LIGHTS_ENABLED=1 for GPIO)\n");
+#endif
 }
 
 void loop() {
     const uint32_t now = millis();
 
     updateDemoSequence(now);
+#if VEHICLE_LIGHTS_ENABLED
+    updateVehicleLights(now);
+#endif
 
     // Ultrasonic disabled. No pulseIn() calls = no 25 ms blocking stall = loop free
     // to run TX at full 100 Hz. Re-enable by flipping US_ENABLED to 1.
@@ -769,6 +831,7 @@ void loop() {
     distanceValid = false;
 #endif
 
+#if !VEHICLE_LIGHTS_ENABLED
     if (now - lastDhtAt >= DHT_INTERVAL_MS) {
         lastDhtAt = now;
         const float t = dht.readTemperature();
@@ -781,6 +844,7 @@ void loop() {
             isnan(tempC)      ? "---" : String(tempC, 1).c_str(),
             isnan(humidity)   ? "---" : String(humidity, 1).c_str());
     }
+#endif
 
     updateTachRpm(now);
     updateVssMph(now);

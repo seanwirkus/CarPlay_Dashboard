@@ -75,3 +75,18 @@
 #define FUEL_R_EMPTY     94.0f
 // Pull-up resistor value used in the divider.
 #define FUEL_PULLUP_OHMS 100.0f
+
+// Vehicle exterior lighting inputs (optocoupler OUT → GPIO, active LOW when lamp on).
+// Enable with -DVEHICLE_LIGHTS_ENABLED=1. Sacrifices DHT (GPIO3), status LED (GPIO8), and
+// the ext-WiFi UART pads (GPIO20/21) — do not enable if those peripherals are wired.
+#ifndef VEHICLE_LIGHTS_ENABLED
+#define VEHICLE_LIGHTS_ENABLED 0
+#endif
+
+#if VEHICLE_LIGHTS_ENABLED
+#define LIGHT_LEFT_PIN    3   // was DHT — column BLK/GRN turn feed via opto
+#define LIGHT_RIGHT_PIN   8   // was status LED — column LT GRN/BLK via opto
+#define LIGHT_BRAKE_PIN   20  // brake pedal WHT/BLK via opto (conflicts with EXT_WIFI RX)
+#define LIGHT_HEAD_PIN    21  // parking/head circuit via opto (conflicts with EXT_WIFI TX)
+// Hazard is derived in firmware when left AND right are simultaneously active.
+#endif
